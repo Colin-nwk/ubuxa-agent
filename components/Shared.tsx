@@ -77,16 +77,16 @@ export function DataTable<TData>({ data, columns, searchPlaceholder = "Search...
           <input
             value={globalFilter ?? ''}
             onChange={e => setGlobalFilter(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-2xl text-sm focus:ring-2 focus:ring-gold focus:outline-none transition-all"
+            className="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-2xl text-sm text-slate-900 focus:ring-2 focus:ring-gold focus:outline-none transition-all"
             placeholder={searchPlaceholder}
           />
         </div>
         <div className="flex items-center space-x-2">
-          <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Page Size:</span>
+          <span className="text-xs font-bold text-slate-900 uppercase tracking-widest">Page Size:</span>
           <select
             value={table.getState().pagination.pageSize}
             onChange={e => table.setPageSize(Number(e.target.value))}
-            className="bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-gold"
+            className="bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-gold"
           >
             {[5, 10, 20, 30, 40, 50].map(pageSize => (
               <option key={pageSize} value={pageSize}>
@@ -104,22 +104,20 @@ export function DataTable<TData>({ data, columns, searchPlaceholder = "Search...
             <thead className="bg-slate-900 text-white">
               {table.getHeaderGroups().map(headerGroup => (
                 <tr key={headerGroup.id}>
-                  {table.getHeaderGroups().map(headerGroup => (
-                    headerGroup.headers.map(header => (
-                      <th key={header.id} className="px-6 py-5 text-[10px] font-bold uppercase tracking-widest">
-                        {header.isPlaceholder ? null : (
-                          <div
-                            className={`flex items-center space-x-2 ${header.column.getCanSort() ? 'cursor-pointer select-none' : ''}`}
-                            onClick={header.column.getToggleSortingHandler()}
-                          >
-                            {flexRender(header.column.columnDef.header, header.getContext())}
-                            {header.column.getCanSort() && (
-                              <ArrowUpDown size={14} className={`transition-opacity ${header.column.getIsSorted() ? 'opacity-100 text-gold' : 'opacity-30'}`} />
-                            )}
-                          </div>
-                        )}
-                      </th>
-                    ))
+                  {headerGroup.headers.map(header => (
+                    <th key={header.id} className="px-6 py-5 text-[10px] font-bold uppercase tracking-widest">
+                      {header.isPlaceholder ? null : (
+                        <div
+                          className={`flex items-center space-x-2 ${header.column.getCanSort() ? 'cursor-pointer select-none' : ''}`}
+                          onClick={header.column.getToggleSortingHandler()}
+                        >
+                          {flexRender(header.column.columnDef.header, header.getContext())}
+                          {header.column.getCanSort() && (
+                            <ArrowUpDown size={14} className={`transition-opacity ${header.column.getIsSorted() ? 'opacity-100 text-gold' : 'opacity-30'}`} />
+                          )}
+                        </div>
+                      )}
+                    </th>
                   ))}
                 </tr>
               ))}
