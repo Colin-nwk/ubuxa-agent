@@ -5,6 +5,18 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>UBUXA Agent Portal</title>
+    
+    <!-- PWA Primary Tags -->
+    <meta name="theme-color" content="#0f172a" />
+    <meta name="description" content="Premium Agent Management Portal" />
+    <link rel="manifest" href="manifest.json" />
+    
+    <!-- iOS Support -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="UBUXA" />
+    <link rel="apple-touch-icon" href="https://img.icons8.com/color/192/000000/solar-panel.png" />
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <style>
@@ -24,6 +36,14 @@
       }
       .border-gold {
         border-color: #d4af37;
+      }
+      /* Custom Animation for Offline Badge */
+      @keyframes pulse-red {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.6; }
+      }
+      .animate-pulse-red {
+        animation: pulse-red 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
       }
     </style>
   <script type="importmap">

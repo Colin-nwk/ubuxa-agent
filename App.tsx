@@ -17,7 +17,8 @@ import {
   LogOut,
   Layers,
   TableProperties,
-  Box
+  Box,
+  WifiOff
 } from 'lucide-react';
 import Dashboard from './components/Dashboard';
 import Customers from './components/Customers';
@@ -39,10 +40,22 @@ import DevicesList from './components/DevicesList';
 const App: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
 
   useEffect(() => {
     const auth = localStorage.getItem('agent_auth');
     if (auth) setIsLoggedIn(true);
+
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
   }, []);
 
   if (!isLoggedIn) {
@@ -98,6 +111,12 @@ const App: React.FC = () => {
           <div className="flex items-center space-x-3">
              <div className="w-8 h-8 bg-gold-gradient rounded-lg flex items-center justify-center font-bold text-slate-900">U</div>
              <span className="text-lg font-serif font-bold text-slate-900">UBUXA</span>
+             {!isOnline && (
+               <div className="bg-red-50 text-red-600 px-2 py-0.5 rounded-lg flex items-center space-x-1 animate-pulse-red">
+                 <WifiOff size={14} />
+                 <span className="text-[10px] font-bold uppercase">Offline</span>
+               </div>
+             )}
           </div>
           <button onClick={() => setIsSidebarOpen(true)} className="p-2 text-slate-600">
             <Menu size={24} />
@@ -136,7 +155,15 @@ const App: React.FC = () => {
           <div className="max-w-7xl mx-auto p-4 lg:p-8">
             <header className="hidden lg:flex justify-between items-center mb-8">
                <div className="flex flex-col">
-                  <h1 className="text-2xl font-serif font-bold text-slate-900">Portal</h1>
+                  <div className="flex items-center space-x-3">
+                    <h1 className="text-2xl font-serif font-bold text-slate-900">Portal</h1>
+                    {!isOnline && (
+                      <div className="bg-red-50 text-red-600 px-3 py-1 rounded-xl flex items-center space-x-2 animate-pulse-red border border-red-100">
+                        <WifiOff size={16} />
+                        <span className="text-xs font-bold uppercase tracking-widest">Working Offline</span>
+                      </div>
+                    )}
+                  </div>
                   <p className="text-slate-500 text-sm">Welcome back, Agent Collins</p>
                </div>
                <div className="flex items-center space-x-6">
