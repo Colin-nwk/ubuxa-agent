@@ -63,9 +63,9 @@ const Dashboard: React.FC = () => {
         <div className="lg:col-span-2 bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-lg font-bold text-slate-900">Weekly Performance</h2>
-            <select className="bg-slate-50 border border-slate-200 text-xs font-medium rounded-lg px-3 py-1.5 focus:outline-none">
-              <option>Last 7 Days</option>
-              <option>Last 30 Days</option>
+            <select className="bg-slate-50 border border-slate-200 text-xs font-bold text-slate-900 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-gold transition-all cursor-pointer">
+              <option className="text-slate-900">Last 7 Days</option>
+              <option className="text-slate-900">Last 30 Days</option>
             </select>
           </div>
           <div className="h-80">

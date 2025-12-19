@@ -14,7 +14,8 @@ import {
   Building2,
   Search,
   ArrowUpRight,
-  ClipboardList
+  ClipboardList,
+  ChevronRight
 } from 'lucide-react';
 import { SideDrawer, PrimaryButton, SecondaryButton, Input, Select, Tabs, Toast } from './Shared';
 
@@ -71,12 +72,12 @@ const Inventory: React.FC = () => {
   }, [activeTab, currentPage]);
 
   const inventoryTabs = [
-    { id: 'stock', label: 'My Local Stock', icon: <Package size={14} /> },
-    { id: 'requests', label: 'Restock Requests', icon: <ArrowLeftRight size={14} /> }
+    { id: 'stock', label: 'Local Stock', icon: <Package size={14} /> },
+    { id: 'requests', label: 'Restock', icon: <ArrowLeftRight size={14} /> }
   ];
 
   return (
-    <div className="space-y-6 animate-in slide-in-from-right-4 duration-500 pb-20 lg:pb-8">
+    <div className="space-y-6 animate-in slide-in-from-right-4 duration-500 pb-24 lg:pb-8">
       {toast && (
         <Toast 
           title={toast.title} 
@@ -86,28 +87,32 @@ const Inventory: React.FC = () => {
         />
       )}
 
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      {/* Responsive Header */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
         <div>
-          <h2 className="text-2xl font-serif font-bold text-slate-900">Inventory Management</h2>
-          <p className="text-slate-500 text-sm">Monitor levels and coordinate with your parent store</p>
+          <h2 className="text-2xl lg:text-3xl font-serif font-bold text-slate-900">Inventory</h2>
+          <p className="text-slate-500 text-sm">Monitor stock and coordinate hub replenishment</p>
         </div>
-        <div className="flex items-center space-x-3">
-          <Tabs tabs={inventoryTabs} activeTab={activeTab} onChange={(id) => { setActiveTab(id); setCurrentPage(1); }} />
+        
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          <div className="flex-1 sm:w-auto">
+            <Tabs tabs={inventoryTabs} activeTab={activeTab} onChange={(id) => { setActiveTab(id); setCurrentPage(1); }} />
+          </div>
           <button 
             onClick={() => setIsRequestDrawerOpen(true)}
-            className="bg-slate-900 text-white px-6 py-3 rounded-2xl font-bold flex items-center justify-center space-x-2 shadow-lg hover:bg-slate-800 transition-all"
+            className="bg-slate-900 text-white px-6 py-3.5 rounded-2xl font-bold flex items-center justify-center space-x-2 shadow-lg hover:bg-slate-800 transition-all active:scale-95"
           >
             <Plus size={20} />
-            <span className="hidden sm:inline">Request Stock</span>
+            <span>Request Stock</span>
           </button>
         </div>
       </div>
 
       {activeTab === 'stock' ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
           {paginatedData.map((item: any) => (
             <div key={item.id} className="bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden group hover:border-gold transition-all duration-300">
-              <div className="relative h-48 bg-slate-100 overflow-hidden">
+              <div className="relative h-44 sm:h-48 bg-slate-100 overflow-hidden">
                 <img src={`https://picsum.photos/seed/${item.id}/400/300`} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt={item.name} />
                 <div className="absolute top-4 left-4">
                    <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider shadow-sm ${
@@ -118,24 +123,24 @@ const Inventory: React.FC = () => {
                 </div>
               </div>
               
-              <div className="p-6">
-                <h3 className="text-lg font-bold text-slate-900 mb-1 line-clamp-1">{item.name}</h3>
+              <div className="p-5 lg:p-6">
+                <h3 className="text-base lg:text-lg font-bold text-slate-900 mb-1 line-clamp-1">{item.name}</h3>
                 <p className="text-gold font-bold text-lg mb-4">₦{item.price.toLocaleString()}</p>
                 
                 <div className="flex items-center justify-between pt-4 border-t border-slate-50">
                   <div className="flex flex-col">
-                    <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Available Stock</span>
-                    <span className={`text-xl font-bold ${item.stock < 10 ? 'text-red-500' : 'text-slate-900'}`}>{item.stock} Units</span>
+                    <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Available</span>
+                    <span className={`text-lg lg:text-xl font-bold ${item.stock < 10 ? 'text-red-500' : 'text-slate-900'}`}>{item.stock} Units</span>
                   </div>
-                  <button className="w-10 h-10 bg-slate-50 text-slate-400 rounded-full flex items-center justify-center hover:bg-gold-gradient hover:text-slate-900 transition-all">
-                    <ShoppingBag size={18} />
+                  <button className="w-10 h-10 lg:w-12 lg:h-12 bg-slate-50 text-slate-400 rounded-2xl flex items-center justify-center hover:bg-gold-gradient hover:text-slate-900 transition-all active:scale-90">
+                    <ShoppingBag size={20} />
                   </button>
                 </div>
 
                 {item.stock < 10 && (
-                  <div className="mt-4 flex items-center space-x-2 text-red-500 bg-red-50 px-3 py-2 rounded-xl animate-pulse">
+                  <div className="mt-4 flex items-center space-x-2 text-red-500 bg-red-50 px-3 py-2.5 rounded-xl animate-pulse">
                     <AlertCircle size={14} />
-                    <span className="text-[10px] font-bold uppercase">Critical Low Stock</span>
+                    <span className="text-[10px] font-bold uppercase">Low Stock Level</span>
                   </div>
                 )}
               </div>
@@ -143,46 +148,59 @@ const Inventory: React.FC = () => {
           ))}
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-3 lg:space-y-4">
           {paginatedData.map((req: any) => (
-            <div key={req.id} className="bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6 group hover:border-gold transition-all">
-              <div className="flex items-center space-x-5">
-                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-colors ${
+            <div key={req.id} className="bg-white p-5 lg:p-6 rounded-[2rem] border border-slate-100 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-6 group hover:border-gold transition-all relative overflow-hidden">
+              <div className="flex items-start sm:items-center space-x-4 lg:space-x-5">
+                <div className={`w-12 h-12 lg:w-14 lg:h-14 rounded-2xl flex items-center justify-center transition-colors flex-shrink-0 ${
                   req.status === 'PENDING' ? 'bg-slate-50 text-slate-400' : 
                   req.status === 'SHIPPED' ? 'bg-blue-50 text-blue-600' : 'bg-green-50 text-green-600'
                 }`}>
-                  {req.status === 'PENDING' ? <Clock size={24} /> : req.status === 'SHIPPED' ? <Truck size={24} /> : <CheckCircle2 size={24} />}
+                  {req.status === 'PENDING' ? <Clock size={22} /> : req.status === 'SHIPPED' ? <Truck size={22} /> : <CheckCircle2 size={22} />}
                 </div>
-                <div>
-                  <div className="flex items-center space-x-2">
-                    <h4 className="font-bold text-slate-900">{req.item}</h4>
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{req.id}</span>
+                
+                <div className="flex-1 min-w-0">
+                  <div className="flex flex-wrap items-center gap-x-2">
+                    <h4 className="font-bold text-slate-900 truncate text-sm lg:text-base">{req.item}</h4>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-50 px-1.5 py-0.5 rounded leading-none">{req.id}</span>
                   </div>
-                  <p className="text-sm text-slate-500 flex items-center space-x-2 mt-0.5">
-                    <Building2 size={12} />
-                    <span>Requested from: {req.store}</span>
+                  
+                  <p className="text-xs text-slate-500 flex items-center space-x-1.5 mt-1">
+                    <Building2 size={12} className="flex-shrink-0" />
+                    <span className="truncate">{req.store}</span>
                   </p>
-                  <div className="flex items-center space-x-4 mt-2">
-                     <span className="text-xs font-bold text-slate-900">{req.qty} Units</span>
-                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{req.date}</span>
+                  
+                  <div className="flex items-center space-x-4 mt-3">
+                     <div className="flex flex-col">
+                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Quantity</span>
+                        <span className="text-xs font-bold text-slate-900">{req.qty} Units</span>
+                     </div>
+                     <div className="h-6 w-px bg-slate-100"></div>
+                     <div className="flex flex-col">
+                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Date</span>
+                        <span className="text-xs font-bold text-slate-500">{req.date}</span>
+                     </div>
                   </div>
                 </div>
               </div>
               
-              <div className="flex items-center space-x-3">
-                <span className={`px-4 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-widest border ${
+              <div className="flex items-center justify-between sm:justify-end gap-3 mt-4 sm:mt-0 border-t sm:border-t-0 pt-4 sm:pt-0">
+                <span className={`px-4 py-1.5 rounded-xl text-[10px] font-bold uppercase tracking-widest border flex-shrink-0 ${
                   req.status === 'PENDING' ? 'bg-slate-50 text-slate-500 border-slate-100' : 
                   req.status === 'SHIPPED' ? 'bg-blue-50 text-blue-600 border-blue-100' : 'bg-green-50 text-green-600 border-green-100'
                 }`}>
                   {req.status}
                 </span>
-                {req.status === 'SHIPPED' && (
+                
+                {req.status === 'SHIPPED' ? (
                   <button 
                     onClick={() => handleConfirmReceipt(req.id)}
-                    className="px-6 py-2 bg-gold-gradient text-slate-900 rounded-xl font-bold text-xs shadow-md hover:scale-105 transition-transform"
+                    className="flex-1 sm:flex-none px-6 py-2.5 bg-gold-gradient text-slate-900 rounded-xl font-bold text-xs shadow-md hover:scale-105 active:scale-95 transition-transform whitespace-nowrap"
                   >
                     Confirm Receipt
                   </button>
+                ) : (
+                  <ChevronRight size={18} className="text-slate-300 group-hover:text-gold hidden sm:block" />
                 )}
               </div>
             </div>
@@ -192,7 +210,7 @@ const Inventory: React.FC = () => {
 
       {/* Pagination Controls */}
       {totalPages > 1 && (
-        <div className="px-8 py-6 bg-white rounded-[2rem] border border-slate-100 flex items-center justify-between shadow-sm">
+        <div className="px-6 py-5 lg:px-8 bg-white rounded-[2rem] border border-slate-100 flex items-center justify-between shadow-sm">
           <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
             Page {currentPage} of {totalPages}
           </span>
@@ -200,14 +218,14 @@ const Inventory: React.FC = () => {
             <button 
               onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
               disabled={currentPage === 1}
-              className="w-10 h-10 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-900 disabled:opacity-30 transition-all shadow-sm"
+              className="w-10 h-10 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-900 disabled:opacity-30 transition-all shadow-sm active:scale-90"
             >
               <ChevronLeftIcon size={18} />
             </button>
             <button 
               onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
-              className="w-10 h-10 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-900 disabled:opacity-30 transition-all shadow-sm"
+              className="w-10 h-10 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-900 disabled:opacity-30 transition-all shadow-sm active:scale-90"
             >
               <ChevronRightIcon size={18} />
             </button>
@@ -215,64 +233,68 @@ const Inventory: React.FC = () => {
         </div>
       )}
 
-      {/* SideDrawer for Restock Request */}
+      {/* Restock Request Drawer - Full width on small mobile */}
       <SideDrawer
         isOpen={isRequestDrawerOpen}
         onClose={() => setIsRequestDrawerOpen(false)}
-        title="Stock Allocation Request"
-        subtitle="Request new inventory items from your parent distribution hub."
+        title="Stock Request"
+        subtitle="Replenish your inventory from the hub."
+        maxWidth="max-w-xl"
         footer={
-          <PrimaryButton 
-            className="w-full py-4 text-lg" 
-            onClick={handleRequestSubmit}
-            disabled={!requestItem || !requestQty}
-          >
-            Submit Request
-          </PrimaryButton>
+          <div className="flex flex-col sm:flex-row gap-3">
+             <SecondaryButton className="flex-1 order-2 sm:order-1" onClick={() => setIsRequestDrawerOpen(false)}>Discard</SecondaryButton>
+             <PrimaryButton 
+              className="flex-1 order-1 sm:order-2 py-4" 
+              onClick={handleRequestSubmit}
+              disabled={!requestItem || !requestQty}
+            >
+              Submit Request
+            </PrimaryButton>
+          </div>
         }
       >
-        <div className="space-y-8">
-           <div className="p-6 bg-blue-50 border border-blue-100 rounded-[2rem] flex items-start space-x-4">
-              <div className="p-2 bg-blue-600 text-white rounded-xl">
+        <div className="space-y-6 lg:space-y-8">
+           <div className="p-5 lg:p-6 bg-blue-50 border border-blue-100 rounded-[2rem] flex items-start space-x-4">
+              <div className="p-2 bg-blue-600 text-white rounded-xl flex-shrink-0">
                  <ClipboardList size={20} />
               </div>
               <div className="flex-1">
-                 <h5 className="text-sm font-bold text-blue-900 leading-tight">Allocation Policy</h5>
-                 <p className="text-[11px] text-blue-700 mt-1">Requests are typically approved within 24 hours. Ensure your current sales conversion rates justify the requested volume.</p>
+                 <h5 className="text-sm font-bold text-blue-900 leading-tight">Hub Allocation</h5>
+                 <p className="text-[11px] lg:text-xs text-blue-700 mt-1 leading-relaxed font-medium">Approved requests usually ship within 24 hours. Ensure your current performance meets hub guidelines.</p>
               </div>
            </div>
 
-           <div className="space-y-6">
+           <div className="space-y-5 lg:space-y-6">
               <div className="space-y-2">
-                 <label className="text-xs font-bold text-slate-400 uppercase tracking-widest pl-1">Target Product</label>
+                 <label className="text-[10px] lg:text-xs font-bold text-slate-400 uppercase tracking-widest pl-1">Target Product</label>
                  <div className="relative">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
                     <input 
                       type="text" 
-                      placeholder="Search inventory items..." 
-                      className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-gold focus:outline-none transition-all"
+                      placeholder="Search items..." 
+                      className="w-full pl-12 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-gold focus:outline-none transition-all text-sm"
                       value={requestItem}
                       onChange={(e) => setRequestItem(e.target.value)}
                     />
                  </div>
                  {requestItem && (
-                   <div className="mt-2 p-3 bg-white border border-slate-100 rounded-xl flex items-center justify-between">
-                      <span className="text-xs font-medium text-slate-600">Matched: {requestItem}</span>
+                   <div className="mt-2 p-3 bg-white border border-slate-100 rounded-xl flex items-center justify-between animate-in fade-in slide-in-from-top-1">
+                      <span className="text-[11px] font-bold text-slate-600 uppercase">Linked: {requestItem}</span>
                       <CheckCircle2 size={14} className="text-green-500" />
                    </div>
                  )}
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                  <Input 
-                   label="Quantity Needed" 
+                   label="Quantity" 
                    type="number" 
                    placeholder="0" 
                    value={requestQty}
                    onChange={(e) => setRequestQty(e.target.value)}
                  />
                  <Select 
-                   label="Distribution Hub"
+                   label="Source Store"
                    value={requestStore}
                    onChange={(e) => setRequestStore(e.target.value)}
                  >
@@ -281,20 +303,20 @@ const Inventory: React.FC = () => {
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-400 uppercase tracking-widest pl-1">Justification (Optional)</label>
+                <label className="text-[10px] lg:text-xs font-bold text-slate-400 uppercase tracking-widest pl-1">Justification</label>
                 <textarea 
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 font-medium focus:ring-2 focus:ring-gold focus:outline-none min-h-[100px] resize-none"
-                  placeholder="e.g. Bulk order for Project Alpha..."
+                  className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 font-medium focus:ring-2 focus:ring-gold focus:outline-none min-h-[100px] resize-none text-sm"
+                  placeholder="e.g. Sales spike in Lekki sector..."
                 />
               </div>
            </div>
 
-           <div className="p-6 bg-slate-900 rounded-[2.5rem] text-white flex items-center justify-between shadow-xl">
+           <div className="p-6 bg-slate-900 rounded-[2.5rem] text-white flex items-center justify-between shadow-xl mt-4">
               <div>
-                 <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Est. Allocation Value</p>
-                 <h4 className="text-xl font-bold text-gold">₦{((Number(requestQty) || 0) * 120000).toLocaleString()}</h4>
+                 <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Est. Allocation Value</p>
+                 <h4 className="text-xl lg:text-2xl font-bold text-gold">₦{((Number(requestQty) || 0) * 120000).toLocaleString()}</h4>
               </div>
-              <ArrowUpRight className="text-gold" size={32} strokeWidth={1} />
+              <ArrowUpRight className="text-gold opacity-50" size={32} strokeWidth={1} />
            </div>
         </div>
       </SideDrawer>
