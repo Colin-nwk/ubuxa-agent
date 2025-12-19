@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
   Box, 
   Plus, 
@@ -12,7 +12,9 @@ import {
   MoreVertical,
   Layers,
   ShoppingBag,
-  ArrowRight
+  ArrowRight,
+  ChevronLeft as ChevronLeftIcon,
+  ChevronRight as ChevronRightIcon
 } from 'lucide-react';
 import { SideDrawer, PrimaryButton, Input, MultiSelect, StatCard } from './Shared';
 
@@ -53,6 +55,15 @@ const MOCK_PACKAGES = [
     conversions: 12,
     category: 'Add-on'
   },
+  { 
+    id: 'P5', 
+    name: 'Office Energy Plus', 
+    items: ['6x 450W Panel', '1x 5kVA Inverter', '4x 200Ah Battery'], 
+    price: 1850000, 
+    popular: false, 
+    conversions: 5,
+    category: 'Commercial'
+  },
 ];
 
 const INVENTORY_OPTIONS = [
@@ -64,10 +75,17 @@ const INVENTORY_OPTIONS = [
   'Charge Controller 60A'
 ];
 
+const ITEMS_PER_PAGE = 4;
+
 const Packages: React.FC = () => {
   const [isAddDrawerOpen, setIsAddDrawerOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
 
   const filteredPackages = useMemo(() => {
     return MOCK_PACKAGES.filter(pkg => 
@@ -76,8 +94,14 @@ const Packages: React.FC = () => {
     );
   }, [searchQuery]);
 
+  const totalPages = Math.ceil(filteredPackages.length / ITEMS_PER_PAGE);
+  const paginatedPackages = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredPackages.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [filteredPackages, currentPage]);
+
   return (
-    <div className="space-y-8 animate-in fade-in duration-500 pb-12">
+    <div className="space-y-8 animate-in fade-in duration-500 pb-20 lg:pb-12">
       {/* Header & Stats */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -129,7 +153,7 @@ const Packages: React.FC = () => {
 
       {/* Packages Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-2 gap-8">
-        {filteredPackages.map((pkg) => (
+        {paginatedPackages.map((pkg) => (
           <div key={pkg.id} className="bg-white rounded-[2.5rem] border border-slate-100 shadow-sm overflow-hidden hover:border-gold hover:shadow-xl transition-all duration-300 group">
             <div className="p-8 flex flex-col h-full">
               <div className="flex justify-between items-start mb-6">
@@ -176,6 +200,31 @@ const Packages: React.FC = () => {
         ))}
       </div>
 
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="px-8 py-6 bg-white rounded-[2rem] border border-slate-100 flex items-center justify-between shadow-sm">
+          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+            Page {currentPage} of {totalPages}
+          </span>
+          <div className="flex space-x-2">
+            <button 
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="w-10 h-10 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-900 disabled:opacity-30 transition-all shadow-sm"
+            >
+              <ChevronLeftIcon size={18} />
+            </button>
+            <button 
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              className="w-10 h-10 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-900 disabled:opacity-30 transition-all shadow-sm"
+            >
+              <ChevronRightIcon size={18} />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Create Bundle SideDrawer */}
       <SideDrawer
         isOpen={isAddDrawerOpen}
@@ -198,7 +247,7 @@ const Packages: React.FC = () => {
                selected={selectedItems} 
                onChange={setSelectedItems} 
              />
-             <p className="text-[10px] text-slate-400 italic px-1 italic">Selecting multiple items will automatically calculate a suggested base price based on inventory unit costs.</p>
+             <p className="text-[10px] text-slate-400 italic px-1">Selecting multiple items will automatically calculate a suggested base price based on inventory unit costs.</p>
           </div>
 
           <Input label="Custom Package Price (₦)" type="number" placeholder="Enter amount..." icon={<ShoppingBag size={18} />} />

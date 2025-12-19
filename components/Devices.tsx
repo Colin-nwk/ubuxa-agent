@@ -1,6 +1,6 @@
 
-import React, { useState, useMemo } from 'react';
-import { Smartphone, Key, History, Search, RefreshCw, SmartphoneIcon, Clock, User, Hash } from 'lucide-react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { Smartphone, Key, History, Search, RefreshCw, SmartphoneIcon, Clock, User, Hash, ChevronLeft as ChevronLeftIcon, ChevronRight as ChevronRightIcon } from 'lucide-react';
 import { SideDrawer, DataTable } from './Shared';
 import { ColumnDef } from '@tanstack/react-table';
 
@@ -10,6 +10,8 @@ const MOCK_DEVICES = [
   { id: '3', sn: 'SP-2023-Z05', model: 'Battery Monitor', status: 'RESERVED', tokenable: false },
   { id: '4', sn: 'SP-2024-K18', model: 'Solar Hub Pro v2', status: 'AVAILABLE', tokenable: true },
   { id: '5', sn: 'SP-2024-L99', model: 'Inverter Smart 5k', status: 'RESERVED', tokenable: true },
+  { id: '6', sn: 'SP-2024-M44', model: 'Solar Hub Pro v2', status: 'AVAILABLE', tokenable: true },
+  { id: '7', sn: 'SP-2024-N55', model: 'Battery Monitor', status: 'USED', tokenable: false },
 ];
 
 const MOCK_TOKEN_HISTORY = [
@@ -22,6 +24,7 @@ const MOCK_TOKEN_HISTORY = [
 
 const MODELS = ['All Models', 'Solar Hub Pro v2', 'Inverter Smart 5k', 'Battery Monitor'];
 const STATUSES = ['All', 'Available', 'Used', 'Reserved'];
+const ITEMS_PER_PAGE = 4;
 
 interface TokenLog {
   id: string;
@@ -37,6 +40,11 @@ const Devices: React.FC = () => {
   const [selectedModel, setSelectedModel] = useState('All Models');
   const [selectedStatus, setSelectedStatus] = useState('All');
   const [isHistoryDrawerOpen, setIsHistoryDrawerOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, selectedModel, selectedStatus]);
 
   const filteredDevices = useMemo(() => {
     return MOCK_DEVICES.filter(device => {
@@ -53,6 +61,12 @@ const Devices: React.FC = () => {
       return matchesSearch && matchesModel && matchesStatus;
     });
   }, [searchQuery, selectedModel, selectedStatus]);
+
+  const totalPages = Math.ceil(filteredDevices.length / ITEMS_PER_PAGE);
+  const paginatedDevices = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredDevices.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [filteredDevices, currentPage]);
 
   const historyColumns = useMemo<ColumnDef<TokenLog>[]>(() => [
     {
@@ -106,7 +120,7 @@ const Devices: React.FC = () => {
   ], []);
 
   return (
-    <div className="space-y-6 animate-in fade-in slide-in-from-left-4 duration-500">
+    <div className="space-y-6 animate-in fade-in slide-in-from-left-4 duration-500 pb-20 lg:pb-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-serif font-bold text-slate-900">Device Management</h2>
@@ -124,7 +138,7 @@ const Devices: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Filter/Search */}
         <div className="lg:col-span-1 space-y-4">
-          <div className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-slate-100 sticky top-8">
+          <div className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-slate-100 lg:sticky lg:top-8">
              <h3 className="font-bold text-slate-900 mb-4 text-sm uppercase tracking-widest">Filters</h3>
              <div className="space-y-4">
                 <div className="relative">
@@ -175,45 +189,72 @@ const Devices: React.FC = () => {
 
         {/* Device List */}
         <div className="lg:col-span-3 space-y-4">
-          {filteredDevices.length > 0 ? (
-            filteredDevices.map((device) => (
-              <div key={device.id} className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-6 hover:border-gold hover:shadow-lg transition-all group">
-                <div className="flex items-center space-x-5">
-                  <div className="w-16 h-16 bg-slate-50 rounded-3xl flex items-center justify-center text-slate-400 group-hover:bg-slate-900 group-hover:text-gold transition-colors">
-                     <SmartphoneIcon size={32} />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-slate-900 text-lg">{device.sn}</h4>
-                    <p className="text-sm text-slate-500">{device.model}</p>
-                    <div className="flex items-center space-x-2 mt-2">
-                       <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                         device.status === 'AVAILABLE' ? 'bg-green-50 text-green-600' : 
-                         device.status === 'USED' ? 'bg-slate-100 text-slate-500' : 'bg-orange-50 text-orange-600'
-                       }`}>
-                         {device.status}
-                       </span>
-                       {device.tokenable && (
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-gold/10 text-gold border border-gold/20">
-                            PAYGO ENABLED
-                          </span>
-                       )}
+          {paginatedDevices.length > 0 ? (
+            <>
+              {paginatedDevices.map((device) => (
+                <div key={device.id} className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-6 hover:border-gold hover:shadow-lg transition-all group">
+                  <div className="flex items-center space-x-5">
+                    <div className="w-16 h-16 bg-slate-50 rounded-3xl flex items-center justify-center text-slate-400 group-hover:bg-slate-900 group-hover:text-gold transition-colors">
+                       <SmartphoneIcon size={32} />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-slate-900 text-lg">{device.sn}</h4>
+                      <p className="text-sm text-slate-500">{device.model}</p>
+                      <div className="flex items-center space-x-2 mt-2">
+                         <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                           device.status === 'AVAILABLE' ? 'bg-green-50 text-green-600' : 
+                           device.status === 'USED' ? 'bg-slate-100 text-slate-500' : 'bg-orange-50 text-orange-600'
+                         }`}>
+                           {device.status}
+                         </span>
+                         {device.tokenable && (
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-gold/10 text-gold border border-gold/20">
+                              PAYGO ENABLED
+                            </span>
+                         )}
+                      </div>
                     </div>
                   </div>
+                  
+                  <div className="flex items-center space-x-3">
+                     <button className="flex-1 sm:flex-none px-6 py-3 bg-slate-50 text-slate-600 rounded-2xl font-bold text-sm hover:bg-slate-100 transition-colors">
+                       Details
+                     </button>
+                     {device.tokenable && (
+                        <button className="flex-1 sm:flex-none px-6 py-3 bg-gold-gradient text-slate-900 rounded-2xl font-bold text-sm shadow-md hover:scale-105 transition-transform flex items-center justify-center space-x-2">
+                          <Key size={16} />
+                          <span>Gen Token</span>
+                        </button>
+                     )}
+                  </div>
                 </div>
-                
-                <div className="flex items-center space-x-3">
-                   <button className="flex-1 sm:flex-none px-6 py-3 bg-slate-50 text-slate-600 rounded-2xl font-bold text-sm hover:bg-slate-100 transition-colors">
-                     Details
-                   </button>
-                   {device.tokenable && (
-                      <button className="flex-1 sm:flex-none px-6 py-3 bg-gold-gradient text-slate-900 rounded-2xl font-bold text-sm shadow-md hover:scale-105 transition-transform flex items-center justify-center space-x-2">
-                        <Key size={16} />
-                        <span>Gen Token</span>
-                      </button>
-                   )}
+              ))}
+              
+              {/* Pagination Controls */}
+              {totalPages > 1 && (
+                <div className="px-8 py-6 bg-white rounded-[2rem] border border-slate-100 flex items-center justify-between shadow-sm">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                    Page {currentPage} of {totalPages}
+                  </span>
+                  <div className="flex space-x-2">
+                    <button 
+                      onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                      disabled={currentPage === 1}
+                      className="w-10 h-10 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-900 disabled:opacity-30 transition-all shadow-sm"
+                    >
+                      <ChevronLeftIcon size={18} />
+                    </button>
+                    <button 
+                      onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                      disabled={currentPage === totalPages}
+                      className="w-10 h-10 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-900 disabled:opacity-30 transition-all shadow-sm"
+                    >
+                      <ChevronRightIcon size={18} />
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))
+              )}
+            </>
           ) : (
             <div className="bg-white p-12 rounded-[2.5rem] border border-slate-100 text-center space-y-3">
               <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto text-slate-400">
