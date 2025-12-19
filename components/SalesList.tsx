@@ -1,18 +1,20 @@
 
-import React, { useMemo } from 'react';
-import { DataTable, DropdownMenu } from './Shared';
+import React, { useMemo, useState } from 'react';
+import { DataTable, DropdownMenu, SideDrawer, SecondaryButton, PrimaryButton } from './Shared';
 import { ColumnDef } from '@tanstack/react-table';
-import { Eye, FileText, Trash2, ShoppingCart, Calendar, DollarSign } from 'lucide-react';
+import { Eye, FileText, Trash2, ShoppingCart, Calendar, DollarSign, User, Clock, Smartphone, ShieldCheck, AlertCircle } from 'lucide-react';
 
 const MOCK_SALES = [
-  { id: 'SL-2024-001', customer: 'Kathleen Pfeffer', product: 'Starter Home Bundle', amount: 450000, status: 'COMPLETED', date: '2024-10-12', payment: 'MOMO' },
-  { id: 'SL-2024-002', customer: 'Ericka Considine', product: 'Solar Hub Pro v2', amount: 85000, status: 'PENDING', date: '2024-10-11', payment: 'BANK' },
-  { id: 'SL-2024-003', customer: 'Edmond Schulist', product: 'Luminous 220Ah Battery', amount: 280000, status: 'COMPLETED', date: '2024-10-10', payment: 'CASH' },
-  { id: 'SL-2024-004', customer: 'John Smith', product: 'Canadian Solar 450W', amount: 120000, status: 'COMPLETED', date: '2024-10-09', payment: 'MOMO' },
-  { id: 'SL-2024-005', customer: 'Jane Doe', product: 'Elite Power System', amount: 980000, status: 'PENDING', date: '2024-10-08', payment: 'BANK' },
+  { id: 'SL-2024-001', customer: 'Kathleen Pfeffer', product: 'Starter Home Bundle', amount: 450000, status: 'COMPLETED', date: '2024-10-12', payment: 'MOMO', paymentPlan: 'FINANCED', devices: ['SN-X91-001'] },
+  { id: 'SL-2024-002', customer: 'Ericka Considine', product: 'Solar Hub Pro v2', amount: 85000, status: 'PENDING', date: '2024-10-11', payment: 'BANK', paymentPlan: 'OUTRIGHT', devices: ['SN-X91-002'] },
+  { id: 'SL-2024-003', customer: 'Edmond Schulist', product: 'Luminous 220Ah Battery', amount: 280000, status: 'COMPLETED', date: '2024-10-10', payment: 'CASH', paymentPlan: 'OUTRIGHT', devices: [] },
+  { id: 'SL-2024-004', customer: 'John Smith', product: 'Canadian Solar 450W', amount: 120000, status: 'COMPLETED', date: '2024-10-09', payment: 'MOMO', paymentPlan: 'OUTRIGHT', devices: [] },
+  { id: 'SL-2024-005', customer: 'Jane Doe', product: 'Elite Power System', amount: 980000, status: 'PENDING', date: '2024-10-08', payment: 'BANK', paymentPlan: 'FINANCED', devices: ['SN-X91-003', 'SN-X91-004'] },
 ];
 
 const SalesList: React.FC = () => {
+  const [selectedSale, setSelectedSale] = useState<any | null>(null);
+
   const columns = useMemo<ColumnDef<any>[]>(() => [
     {
       accessorKey: 'id',
@@ -62,11 +64,11 @@ const SalesList: React.FC = () => {
     {
       id: 'actions',
       header: 'Options',
-      cell: () => (
+      cell: (info) => (
         <DropdownMenu 
-          trigger={<button className="p-2 hover:bg-slate-100 rounded-lg font-bold text-xs bg-white border border-slate-200">Review</button>}
+          trigger={<button className="p-2 hover:bg-slate-100 rounded-lg font-bold text-xs bg-white border border-slate-200 shadow-sm transition-all hover:border-gold">Review</button>}
           items={[
-            { label: 'Full Audit', icon: <Eye size={14} />, onClick: () => {} },
+            { label: 'Full Audit', icon: <Eye size={14} />, onClick: () => setSelectedSale(info.row.original) },
             { label: 'Download Receipt', icon: <FileText size={14} />, onClick: () => {} },
             { label: 'Void Transaction', icon: <Trash2 size={14} />, onClick: () => {}, variant: 'danger' },
           ]}
@@ -89,6 +91,103 @@ const SalesList: React.FC = () => {
         columns={columns} 
         searchPlaceholder="Filter transactions..."
       />
+
+      <SideDrawer
+        isOpen={!!selectedSale}
+        onClose={() => setSelectedSale(null)}
+        title="Transaction Audit"
+        subtitle={`Audit log for sale ${selectedSale?.id}`}
+        footer={
+          <div className="flex space-x-4">
+            <SecondaryButton className="flex-1" icon={<FileText size={18} />}>
+              Export Audit
+            </SecondaryButton>
+            <PrimaryButton className="flex-1" icon={<ShieldCheck size={18} />}>
+              Support
+            </PrimaryButton>
+          </div>
+        }
+      >
+        {selectedSale && (
+          <div className="space-y-8 animate-in fade-in duration-500">
+            {/* Status Header */}
+            <div className="p-6 bg-slate-900 rounded-[2rem] text-white flex items-center justify-between shadow-xl">
+              <div className="flex items-center space-x-4">
+                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${
+                  selectedSale.status === 'COMPLETED' ? 'bg-green-500/20 text-green-400' : 'bg-blue-500/20 text-blue-400'
+                }`}>
+                  <ShoppingCart size={24} />
+                </div>
+                <div>
+                  <h4 className="text-xl font-bold">{selectedSale.status}</h4>
+                  <p className="text-xs text-slate-400 uppercase tracking-widest">{selectedSale.date}</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="text-xs text-slate-400 font-bold uppercase mb-1">Total</p>
+                <p className="text-2xl font-serif font-bold text-gold">₦{selectedSale.amount.toLocaleString()}</p>
+              </div>
+            </div>
+
+            {/* Customer Section */}
+            <div className="space-y-4">
+              <h5 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest pl-2">Customer Info</h5>
+              <div className="p-5 bg-white border border-slate-100 rounded-[2rem] flex items-center space-x-4 shadow-sm">
+                <div className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center text-slate-400">
+                  <User size={24} />
+                </div>
+                <div>
+                  <p className="font-bold text-slate-900">{selectedSale.customer}</p>
+                  <p className="text-xs text-slate-500">Linked to Account #{selectedSale.id.split('-').pop()}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Product Section */}
+            <div className="space-y-4">
+              <h5 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest pl-2">Order Breakdown</h5>
+              <div className="p-5 bg-slate-50 border border-slate-200 rounded-[2.5rem] space-y-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-slate-500">Primary Product</span>
+                  <span className="text-sm font-bold text-slate-900">{selectedSale.product}</span>
+                </div>
+                <div className="flex justify-between items-center border-t border-slate-200 pt-4">
+                  <span className="text-sm text-slate-500">Payment Plan</span>
+                  <span className="text-xs font-bold bg-slate-200 px-2.5 py-1 rounded-lg text-slate-700">{selectedSale.paymentPlan}</span>
+                </div>
+                <div className="flex justify-between items-center border-t border-slate-200 pt-4">
+                  <span className="text-sm text-slate-500">Registration Time</span>
+                  <span className="text-sm text-slate-600 flex items-center space-x-1">
+                    <Clock size={12} />
+                    <span>09:42 AM</span>
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Devices Section */}
+            {selectedSale.devices && selectedSale.devices.length > 0 && (
+              <div className="space-y-4">
+                <h5 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest pl-2">Hardware Units</h5>
+                <div className="space-y-2">
+                  {selectedSale.devices.map((sn: string) => (
+                    <div key={sn} className="p-4 bg-white border border-slate-100 rounded-2xl flex items-center space-x-3 shadow-sm group hover:border-gold transition-colors">
+                      <Smartphone size={18} className="text-slate-400 group-hover:text-gold" />
+                      <span className="text-sm font-mono font-bold text-slate-700">{sn}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Footer Alert */}
+            <div className="p-4 bg-blue-50 border border-blue-100 rounded-2xl flex items-start space-x-3">
+              <AlertCircle size={18} className="text-blue-500 mt-0.5" />
+              <p className="text-[11px] text-blue-600 font-medium">This transaction audit is locked. Contact your Regional Manager for modifications.</p>
+            </div>
+          </div>
+        )}
+      </SideDrawer>
     </div>
   );
 };
