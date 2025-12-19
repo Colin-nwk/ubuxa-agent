@@ -1,0 +1,415 @@
+
+import React, { useState } from 'react';
+import { 
+  User, 
+  Shield, 
+  Lock, 
+  CreditCard, 
+  Bell, 
+  ChevronRight, 
+  Edit3, 
+  Mail, 
+  Phone, 
+  MapPin, 
+  Camera,
+  CheckCircle2,
+  AlertCircle,
+  Plus,
+  Trash2,
+  Globe,
+  Smartphone
+} from 'lucide-react';
+import { 
+  SideDrawer, 
+  Modal, 
+  Input, 
+  PrimaryButton, 
+  SecondaryButton, 
+  FileUpload, 
+  Switch, 
+  Toast,
+  Checkbox
+} from './Shared';
+
+const SettingsView: React.FC = () => {
+  // State for different UI flows
+  const [activeView, setActiveView] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ title: string; message: string; type: any } | null>(null);
+  
+  // Mock User Data
+  const [user, setUser] = useState({
+    firstName: 'Collins',
+    lastName: 'Nwoko',
+    email: 'collins.nwoko@ubuxa.com',
+    phone: '+234 803 123 4567',
+    location: 'Lekki Phase 1, Lagos',
+    role: 'Senior Sales Agent'
+  });
+
+  const showToast = (title: string, message: string, type: string = 'success') => {
+    setToast({ title, message, type });
+  };
+
+  const handleSave = (viewName: string) => {
+    showToast('Changes Saved', `Your ${viewName} has been successfully updated.`);
+    setActiveView(null);
+  };
+
+  return (
+    <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      {/* Toast Feedback */}
+      {toast && (
+        <Toast 
+          title={toast.title} 
+          message={toast.message} 
+          type={toast.type} 
+          onClose={() => setToast(null)} 
+        />
+      )}
+
+      {/* Header Section (Existing UI kept, enhanced interaction) */}
+      <div className="flex flex-col md:flex-row items-center md:items-start space-y-6 md:space-y-0 md:space-x-8 mb-12">
+        <div className="relative group">
+          <img 
+            src="https://picsum.photos/seed/collins/200/200" 
+            className="w-32 h-32 lg:w-40 lg:h-40 rounded-[2.5rem] border-4 border-white shadow-2xl object-cover transition-transform group-hover:scale-[1.02]" 
+            alt="Profile" 
+          />
+          <button 
+            onClick={() => setActiveView('personal')}
+            className="absolute -bottom-2 -right-2 bg-slate-900 text-gold p-3 rounded-2xl shadow-xl border-4 border-slate-50 hover:scale-110 transition-transform flex items-center justify-center"
+          >
+            <Camera size={20} />
+          </button>
+        </div>
+        <div className="text-center md:text-left pt-2">
+          <h2 className="text-4xl font-serif font-bold text-slate-900">{user.firstName} {user.lastName}</h2>
+          <p className="text-slate-500 font-medium text-lg mt-1">{user.role} • ID: AGT-2024-001</p>
+          <div className="mt-4 flex flex-wrap justify-center md:justify-start gap-2">
+            <div className="inline-flex items-center px-4 py-1.5 bg-green-50 text-green-600 rounded-full text-xs font-bold border border-green-100 uppercase tracking-widest">
+              <div className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse" />
+              Active Status
+            </div>
+            <div className="inline-flex items-center px-4 py-1.5 bg-gold/10 text-gold rounded-full text-xs font-bold border border-gold/20 uppercase tracking-widest">
+              Gold Tier
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Settings Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Account Settings */}
+        <div className="space-y-4">
+          <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest pl-2">Account Management</h3>
+          <SettingItem 
+            icon={<User className="text-blue-500" />} 
+            label="Personal Information" 
+            onClick={() => setActiveView('personal')}
+          />
+          <SettingItem 
+            icon={<Shield className="text-green-500" />} 
+            label="Role & Permissions" 
+            onClick={() => setActiveView('permissions')}
+          />
+          <SettingItem 
+            icon={<Lock className="text-red-500" />} 
+            label="Security & Password" 
+            onClick={() => setActiveView('security')}
+          />
+        </div>
+
+        {/* System Settings */}
+        <div className="space-y-4">
+          <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest pl-2">System & Preferences</h3>
+          <SettingItem 
+            icon={<Bell className="text-gold" />} 
+            label="Notifications" 
+            onClick={() => setActiveView('notifications')}
+          />
+          <SettingItem 
+            icon={<CreditCard className="text-purple-500" />} 
+            label="Payment Methods" 
+            onClick={() => setActiveView('payments')}
+          />
+          
+          {/* Premium Plan Card (Existing UI kept and enhanced) */}
+          <div className="p-6 bg-slate-900 rounded-[2.5rem] text-white flex flex-col space-y-4 shadow-xl shadow-slate-200 border border-slate-800 group hover:border-gold/50 transition-all">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                 <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center border border-white/5">
+                    <Shield size={24} className="text-gold" />
+                 </div>
+                 <div>
+                    <p className="text-sm font-bold">Premium Agent Plan</p>
+                    <p className="text-[10px] text-slate-400 uppercase tracking-widest">Active Subscription</p>
+                 </div>
+              </div>
+              <button 
+                onClick={() => setActiveView('plan')}
+                className="text-xs font-bold bg-gold text-slate-900 px-3 py-1.5 rounded-lg hover:bg-white transition-colors"
+              >
+                Manage
+              </button>
+            </div>
+            <div className="pt-4 border-t border-white/10 flex items-center justify-between">
+              <p className="text-xs text-slate-400">Next billing cycle: <span className="text-white font-medium">April 12, 2024</span></p>
+              <p className="text-sm font-bold text-gold">₦15,000/mo</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* --- MODALS & DRAWERS FOR FLOWS --- */}
+
+      {/* 1. Personal Information SideDrawer */}
+      <SideDrawer
+        isOpen={activeView === 'personal'}
+        onClose={() => setActiveView(null)}
+        title="Identity Settings"
+        subtitle="Manage your public profile and contact reachability."
+        footer={
+          <div className="flex space-x-4">
+            <SecondaryButton className="flex-1" onClick={() => setActiveView(null)}>Cancel</SecondaryButton>
+            <PrimaryButton className="flex-1" onClick={() => handleSave('Profile')}>Update Profile</PrimaryButton>
+          </div>
+        }
+      >
+        <div className="space-y-8">
+          <FileUpload label="Profile Photo" description="JPEG or PNG, min 400x400px" />
+          <div className="grid grid-cols-2 gap-4">
+            <Input label="First Name" defaultValue={user.firstName} />
+            <Input label="Last Name" defaultValue={user.lastName} />
+          </div>
+          <Input label="Email Address" type="email" icon={<Mail size={18} />} defaultValue={user.email} />
+          <Input label="Phone Number" type="tel" icon={<Phone size={18} />} defaultValue={user.phone} />
+          <div className="space-y-2">
+            <label className="text-xs font-bold text-slate-400 uppercase tracking-widest pl-1">Primary Location</label>
+            <div className="relative">
+              <MapPin className="absolute left-4 top-4 text-slate-400" size={18} />
+              <textarea 
+                className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 font-medium focus:ring-2 focus:ring-gold focus:outline-none min-h-[100px] resize-none"
+                defaultValue={user.location}
+              />
+            </div>
+          </div>
+        </div>
+      </SideDrawer>
+
+      {/* 2. Security & Password Modal */}
+      <Modal
+        isOpen={activeView === 'security'}
+        onClose={() => setActiveView(null)}
+        title="Security Center"
+        subtitle="Update your credentials and enable protective features."
+        size="md"
+        type="default"
+        footer={
+          <PrimaryButton onClick={() => handleSave('Security Settings')}>Save Security Profile</PrimaryButton>
+        }
+      >
+        <div className="space-y-6">
+          <div className="p-4 bg-red-50 rounded-2xl border border-red-100 flex items-start space-x-3">
+            <AlertCircle className="text-red-500 mt-0.5" size={18} />
+            <p className="text-xs text-red-600 font-medium">Changing your password will sign you out of all other active sessions on multiple devices.</p>
+          </div>
+          <div className="space-y-4">
+            <Input label="Current Password" type="password" icon={<Lock size={18} />} placeholder="••••••••" />
+            <div className="h-px bg-slate-100 my-2" />
+            <Input label="New Password" type="password" icon={<Lock size={18} />} placeholder="New password" />
+            <Input label="Confirm New Password" type="password" icon={<Lock size={18} />} placeholder="Repeat new password" />
+          </div>
+          <div className="pt-4 border-t border-slate-50 space-y-4">
+            <h5 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Enhanced Protection</h5>
+            <Switch label="Two-Factor Authentication (2FA)" enabled={true} />
+            <Switch label="Biometric Login (FaceID/Fingerprint)" enabled={false} />
+          </div>
+        </div>
+      </Modal>
+
+      {/* 3. Role & Permissions Modal */}
+      <Modal
+        isOpen={activeView === 'permissions'}
+        onClose={() => setActiveView(null)}
+        title="Role Access"
+        subtitle="Review your authorization levels within the UBUXA network."
+        size="md"
+        type="info"
+        footer={<SecondaryButton onClick={() => setActiveView(null)}>Close View</SecondaryButton>}
+      >
+        <div className="space-y-6">
+          <div className="flex items-center space-x-4 p-5 bg-blue-50 rounded-[2rem] border border-blue-100">
+            <div className="w-14 h-14 bg-blue-600 text-white rounded-2xl flex items-center justify-center shadow-lg">
+              <Shield size={28} />
+            </div>
+            <div>
+              <h4 className="font-bold text-slate-900 text-lg">{user.role}</h4>
+              <p className="text-xs text-blue-600 font-bold uppercase tracking-widest">Level 4 Clearance</p>
+            </div>
+          </div>
+          
+          <div className="space-y-3">
+             <h5 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest pl-2">Capabilities</h5>
+             <PermissionCheck label="Register new customers" checked />
+             <PermissionCheck label="Approve stock requests (Level 1)" checked />
+             <PermissionCheck label="Generate PAYGO tokens" checked />
+             <PermissionCheck label="Void transactions (Self-only)" checked />
+             <PermissionCheck label="Direct bank settlements" checked={false} />
+          </div>
+          
+          <p className="text-[10px] text-slate-400 text-center italic mt-4">Contact your Regional Manager to request additional permissions.</p>
+        </div>
+      </Modal>
+
+      {/* 4. Notifications SideDrawer */}
+      <SideDrawer
+        isOpen={activeView === 'notifications'}
+        onClose={() => setActiveView(null)}
+        title="Alert Preferences"
+        subtitle="Control how and when we reach you with system updates."
+        footer={<PrimaryButton className="w-full" onClick={() => handleSave('Notification Preferences')}>Save Preferences</PrimaryButton>}
+      >
+        <div className="space-y-8">
+           <div className="space-y-4">
+              <h5 className="text-xs font-bold text-slate-900 flex items-center space-x-2">
+                 <Smartphone size={16} className="text-gold" />
+                 <span>Push Notifications</span>
+              </h5>
+              <div className="space-y-3 bg-slate-50 p-5 rounded-[2rem] border border-slate-100">
+                 <Switch label="New Customer Activity" enabled={true} />
+                 <Switch label="Stock Replenishment Alerts" enabled={true} />
+                 <Switch label="System Downtime Alerts" enabled={false} />
+              </div>
+           </div>
+
+           <div className="space-y-4">
+              <h5 className="text-xs font-bold text-slate-900 flex items-center space-x-2">
+                 <Mail size={16} className="text-gold" />
+                 <span>Email Reports</span>
+              </h5>
+              <div className="space-y-3 bg-slate-50 p-5 rounded-[2rem] border border-slate-100">
+                 <Switch label="Weekly Sales Summary" enabled={true} />
+                 <Switch label="Commission Statements" enabled={true} />
+                 <Switch label="Marketing Newsletters" enabled={false} />
+              </div>
+           </div>
+        </div>
+      </SideDrawer>
+
+      {/* 5. Payment Methods SideDrawer */}
+      <SideDrawer
+        isOpen={activeView === 'payments'}
+        onClose={() => setActiveView(null)}
+        title="Payout Channels"
+        subtitle="Manage your linked accounts for commission withdrawals."
+        footer={<PrimaryButton className="w-full" icon={<Plus size={18} />}>Add New Channel</PrimaryButton>}
+      >
+        <div className="space-y-6">
+           <PaymentCard 
+              type="Bank Account" 
+              name="Collins Nwoko" 
+              number="Access Bank • •••• 5678" 
+              isDefault 
+           />
+           <PaymentCard 
+              type="Mobile Money" 
+              name="Collins MTN" 
+              number="MTN MoMo • •••• 4321" 
+           />
+           <div className="p-6 border-2 border-dashed border-slate-200 rounded-[2.5rem] flex flex-col items-center justify-center text-center space-y-2 opacity-60 hover:opacity-100 transition-opacity cursor-pointer">
+              <Plus className="text-slate-400" size={32} />
+              <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Connect New Wallet</p>
+           </div>
+        </div>
+      </SideDrawer>
+
+      {/* 6. Premium Plan Modal */}
+      <Modal
+        isOpen={activeView === 'plan'}
+        onClose={() => setActiveView(null)}
+        title="Agent Membership"
+        subtitle="Your currently active subscription plan and benefits."
+        size="md"
+        type="warning"
+        footer={
+          <div className="flex justify-between w-full items-center">
+            <button className="text-red-500 text-xs font-bold hover:underline">Cancel Subscription</button>
+            <PrimaryButton onClick={() => setActiveView(null)}>Got It</PrimaryButton>
+          </div>
+        }
+      >
+        <div className="space-y-6">
+          <div className="bg-gold-gradient p-8 rounded-[2.5rem] text-slate-900 shadow-xl shadow-gold/20">
+             <p className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-70">Current Level</p>
+             <h4 className="text-3xl font-serif font-bold">PREMIUM GOLD</h4>
+             <p className="text-sm font-medium mt-2">Expiring in 24 days</p>
+          </div>
+          
+          <div className="space-y-4">
+             <h5 className="text-[10px] font-bold text-slate-400 uppercase tracking-widest pl-2">Included Features</h5>
+             <div className="grid grid-cols-1 gap-2">
+                <BenefitRow label="Unlimited customer registrations" />
+                <BenefitRow label="Advanced sales analytics & PDF exports" />
+                <BenefitRow label="Regional leaderboard access" />
+                <BenefitRow label="Priority technical support" />
+                <BenefitRow label="Custom agent marketing materials" />
+             </div>
+          </div>
+        </div>
+      </Modal>
+    </div>
+  );
+};
+
+const SettingItem: React.FC<{ icon: React.ReactNode, label: string, onClick?: () => void }> = ({ icon, label, onClick }) => (
+  <button 
+    onClick={onClick}
+    className="w-full flex items-center justify-between p-5 bg-white rounded-[2rem] border border-slate-100 hover:border-gold hover:shadow-xl hover:-translate-y-1 transition-all group"
+  >
+    <div className="flex items-center space-x-4">
+      <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center group-hover:bg-slate-900 group-hover:text-gold transition-colors">
+        {React.cloneElement(icon as React.ReactElement, { size: 24 })}
+      </div>
+      <span className="font-bold text-slate-900 text-sm">{label}</span>
+    </div>
+    <ChevronRight size={18} className="text-slate-300 group-hover:text-gold transition-transform group-hover:translate-x-1" />
+  </button>
+);
+
+const PermissionCheck: React.FC<{ label: string, checked?: boolean }> = ({ label, checked }) => (
+  <div className="flex items-center justify-between p-4 bg-white border border-slate-100 rounded-2xl">
+     <span className="text-sm font-medium text-slate-700">{label}</span>
+     {checked ? <CheckCircle2 size={18} className="text-green-500" /> : <div className="w-4 h-4 rounded-full border-2 border-slate-200" />}
+  </div>
+);
+
+const BenefitRow: React.FC<{ label: string }> = ({ label }) => (
+  <div className="flex items-center space-x-3 text-sm text-slate-700">
+     <div className="w-5 h-5 bg-gold/20 rounded-full flex items-center justify-center">
+        <CheckCircle2 size={12} className="text-gold" />
+     </div>
+     <span>{label}</span>
+  </div>
+);
+
+const PaymentCard: React.FC<{ type: string, name: string, number: string, isDefault?: boolean }> = ({ type, name, number, isDefault }) => (
+  <div className="p-6 bg-white border border-slate-100 rounded-[2.5rem] shadow-sm relative group hover:border-gold transition-all">
+    <div className="flex justify-between items-start mb-4">
+       <div>
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{type}</p>
+          <h4 className="font-bold text-slate-900">{name}</h4>
+       </div>
+       <button className="p-2 text-slate-300 hover:text-red-500 transition-colors">
+          <Trash2 size={16} />
+       </button>
+    </div>
+    <p className="text-sm font-mono text-slate-500">{number}</p>
+    {isDefault && (
+      <div className="absolute top-6 right-12 px-2 py-0.5 bg-green-50 text-green-600 rounded-lg text-[8px] font-bold uppercase">
+         Default
+      </div>
+    )}
+  </div>
+);
+
+export default SettingsView;

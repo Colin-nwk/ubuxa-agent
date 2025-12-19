@@ -1,0 +1,7 @@
+{
+  "name": "UBUXA Agent Portal",
+  "description": "A high-performance, responsive agent management portal featuring sales tracking, inventory management, customer registration, and device token generation with a premium dark blue and gold aesthetic.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
