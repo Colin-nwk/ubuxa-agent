@@ -16,7 +16,8 @@ import {
   Palette,
   BarChart3,
   Smartphone,
-  Wallet
+  Wallet,
+  Bell
 } from 'lucide-react';
 import Dashboard from './components/Dashboard';
 import Customers from './components/Customers';
@@ -28,6 +29,7 @@ import Login from './components/Login';
 import ComponentGallery from './components/ComponentGallery';
 import Reports from './components/Reports';
 import Transactions from './components/Transactions';
+import Notifications from './components/Notifications';
 
 // Theme Context
 export const ThemeContext = createContext({
@@ -82,6 +84,7 @@ const App: React.FC = () => {
 
             <nav className="flex-1 p-4 space-y-2">
                <NavItem to="/" icon={<LayoutDashboard size={20} />} label="Dashboard" />
+               <NavItem to="/notifications" icon={<Bell size={20} />} label="Notifications" />
                <NavItem to="/customers" icon={<Users size={20} />} label="Customers" />
                <NavItem to="/sales" icon={<ShoppingCart size={20} />} label="Sales" />
                <NavItem to="/transactions" icon={<Wallet size={20} />} label="Transactions" />
@@ -130,6 +133,7 @@ const App: React.FC = () => {
              <div className="lg:hidden fixed inset-0 z-20 bg-slate-900/95 backdrop-blur-sm pt-20 px-6">
                 <nav className="space-y-4">
                    <MobileNavItem to="/" icon={<LayoutDashboard size={24} />} label="Dashboard" onClick={() => setIsMobileMenuOpen(false)} />
+                   <MobileNavItem to="/notifications" icon={<Bell size={24} />} label="Notifications" onClick={() => setIsMobileMenuOpen(false)} />
                    <MobileNavItem to="/customers" icon={<Users size={24} />} label="Customers" onClick={() => setIsMobileMenuOpen(false)} />
                    <MobileNavItem to="/sales" icon={<ShoppingCart size={24} />} label="Sales" onClick={() => setIsMobileMenuOpen(false)} />
                    <MobileNavItem to="/transactions" icon={<Wallet size={24} />} label="Transactions" onClick={() => setIsMobileMenuOpen(false)} />
@@ -165,6 +169,7 @@ const App: React.FC = () => {
             <div className="max-w-6xl mx-auto p-4 lg:p-8 w-full flex-1">
               <Routes>
                 <Route path="/" element={<Dashboard />} />
+                <Route path="/notifications" element={<Notifications />} />
                 <Route path="/customers" element={<Customers />} />
                 <Route path="/sales" element={<Sales />} />
                 <Route path="/transactions" element={<Transactions />} />
