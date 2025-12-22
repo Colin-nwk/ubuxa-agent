@@ -51,7 +51,9 @@ import {
   Toast,
   DataTable,
   Modal,
-  BottomSheetModal
+  BottomSheetModal,
+  SignaturePad,
+  CameraCapture
 } from './Shared';
 import { ColumnDef } from '@tanstack/react-table';
 
@@ -383,6 +385,21 @@ const ComponentGallery: React.FC = () => {
                  <MapIcon className="text-accent" size={20} />
               </div>
               <p className="text-sm text-slate-600 dark:text-slate-300 font-medium italic">Integrated mapping interface used for customer coordinate verification during installation audits.</p>
+           </div>
+        </div>
+      </section>
+
+      {/* 7. Input Capture */}
+      <section className="space-y-6">
+        <div className="flex items-center space-x-3 text-slate-400">
+          <Upload size={20} />
+          <h3 className="text-xs font-bold uppercase tracking-widest">Media & Input Capture</h3>
+        </div>
+        <div className="bg-white dark:bg-slate-900 p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 grid grid-cols-1 lg:grid-cols-2 gap-8">
+           <FileUpload label="File Uploader" description="Drag & drop document here" />
+           <SignaturePad label="Digital Signature" />
+           <div className="lg:col-span-2">
+              <CameraCapture label="Evidence Capture" />
            </div>
         </div>
       </section>

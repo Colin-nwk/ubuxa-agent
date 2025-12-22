@@ -17,7 +17,10 @@ import {
   ChevronsRight,
   ArrowUpDown,
   MapPin,
-  CheckCircle2
+  CheckCircle2,
+  Camera,
+  RefreshCw,
+  Trash2
 } from 'lucide-react';
 import {
   useReactTable,
@@ -335,7 +338,7 @@ export function DataTable<TData>({ data, columns, searchPlaceholder = "Search re
 export const FileUpload: React.FC<{ label: string, description?: string, accept?: string, onChange?: (file: File | null) => void }> = ({ label, description, accept, onChange }) => (
   <div className="space-y-2">
     {label && <label className="text-[10px] sm:text-[11px] font-black text-slate-400 uppercase tracking-widest pl-1">{label}</label>}
-    <div className="border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-[2rem] p-6 sm:p-10 flex flex-col items-center justify-center text-center cursor-pointer hover:border-primary hover:bg-blue-50/30 dark:hover:bg-blue-900/10 transition-all bg-slate-50 dark:bg-slate-800 shadow-sm min-h-[160px] sm:min-h-[200px]">
+    <div className="border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-[2rem] p-6 sm:p-10 flex flex-col items-center justify-center text-center cursor-pointer hover:border-primary hover:bg-blue-50/30 dark:hover:bg-blue-900/10 transition-all bg-slate-50 dark:bg-slate-800 shadow-sm min-h-[160px] sm:min-h-[200px] group">
        <Upload className="text-slate-400 mb-3 group-hover:text-primary transition-colors" size={28} />
        <p className="text-base font-bold text-slate-900 dark:text-white">Drop files or tap</p>
        {description && <p className="text-xs text-slate-500 font-medium px-4 mt-1">{description}</p>}
@@ -603,3 +606,207 @@ export const GoogleMapPlaceholder: React.FC<{ address: string }> = ({ address })
     </div>
   </div>
 );
+
+// --- SIGNATURE PAD ---
+export const SignaturePad: React.FC<{ label?: string, onChange?: (signature: string | null) => void }> = ({ label, onChange }) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [isDrawing, setIsDrawing] = useState(false);
+  const [isEmpty, setIsEmpty] = useState(true);
+
+  const startDrawing = (e: React.MouseEvent | React.TouchEvent) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    setIsDrawing(true);
+    const { offsetX, offsetY } = getCoordinates(e, canvas);
+    ctx.beginPath();
+    ctx.moveTo(offsetX, offsetY);
+    ctx.strokeStyle = '#0F766E'; // primary color
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+  };
+
+  const draw = (e: React.MouseEvent | React.TouchEvent) => {
+    if (!isDrawing) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const { offsetX, offsetY } = getCoordinates(e, canvas);
+    ctx.lineTo(offsetX, offsetY);
+    ctx.stroke();
+    if (isEmpty) setIsEmpty(false);
+  };
+
+  const stopDrawing = () => {
+    setIsDrawing(false);
+    if (onChange && canvasRef.current && !isEmpty) {
+      onChange(canvasRef.current.toDataURL());
+    }
+  };
+
+  const getCoordinates = (e: React.MouseEvent | React.TouchEvent, canvas: HTMLCanvasElement) => {
+    let clientX, clientY;
+    if ('touches' in e) {
+      clientX = e.touches[0].clientX;
+      clientY = e.touches[0].clientY;
+    } else {
+      clientX = (e as React.MouseEvent).clientX;
+      clientY = (e as React.MouseEvent).clientY;
+    }
+    const rect = canvas.getBoundingClientRect();
+    return {
+      offsetX: clientX - rect.left,
+      offsetY: clientY - rect.top
+    };
+  };
+
+  const clear = () => {
+    const canvas = canvasRef.current;
+    if (canvas) {
+      const ctx = canvas.getContext('2d');
+      ctx?.clearRect(0, 0, canvas.width, canvas.height);
+      setIsEmpty(true);
+      if (onChange) onChange(null);
+    }
+  };
+
+  return (
+    <div className="space-y-2">
+      {label && <label className="text-[10px] sm:text-[11px] font-black text-slate-400 uppercase tracking-widest pl-1">{label}</label>}
+      <div className="relative border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-2xl bg-white dark:bg-slate-800 overflow-hidden touch-none">
+        <canvas
+          ref={canvasRef}
+          width={400}
+          height={200}
+          className="w-full h-48 cursor-crosshair"
+          onMouseDown={startDrawing}
+          onMouseMove={draw}
+          onMouseUp={stopDrawing}
+          onMouseLeave={stopDrawing}
+          onTouchStart={startDrawing}
+          onTouchMove={draw}
+          onTouchEnd={stopDrawing}
+        />
+        {isEmpty && (
+          <div className="absolute inset-0 pointer-events-none flex items-center justify-center text-slate-300 dark:text-slate-600">
+            <span className="text-sm font-bold">Sign Here</span>
+          </div>
+        )}
+        <button 
+          onClick={clear} 
+          className="absolute top-2 right-2 p-2 bg-slate-100 dark:bg-slate-700 rounded-lg text-slate-500 hover:text-red-500 transition-colors"
+          type="button"
+        >
+          <Trash2 size={16} />
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// --- CAMERA CAPTURE ---
+export const CameraCapture: React.FC<{ label?: string, onCapture?: (image: string) => void }> = ({ label, onCapture }) => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [stream, setStream] = useState<MediaStream | null>(null);
+  const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  const [error, setError] = useState<string>('');
+
+  const startCamera = async () => {
+    try {
+      const mediaStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+      setStream(mediaStream);
+      if (videoRef.current) {
+        videoRef.current.srcObject = mediaStream;
+      }
+      setError('');
+    } catch (err) {
+      setError('Camera access denied or unavailable.');
+    }
+  };
+
+  const stopCamera = () => {
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+      setStream(null);
+    }
+  };
+
+  const capture = () => {
+    if (videoRef.current && canvasRef.current) {
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const image = canvas.toDataURL('image/jpeg');
+        setCapturedImage(image);
+        stopCamera();
+        if (onCapture) onCapture(image);
+      }
+    }
+  };
+
+  const retake = () => {
+    setCapturedImage(null);
+    startCamera();
+  };
+
+  useEffect(() => {
+    return () => {
+      stopCamera();
+    };
+  }, []);
+
+  return (
+    <div className="space-y-2">
+      {label && <label className="text-[10px] sm:text-[11px] font-black text-slate-400 uppercase tracking-widest pl-1">{label}</label>}
+      <div className="relative rounded-3xl overflow-hidden bg-black aspect-video flex items-center justify-center">
+        {capturedImage ? (
+          <img src={capturedImage} alt="Captured" className="w-full h-full object-cover" />
+        ) : stream ? (
+          <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
+        ) : (
+          <div className="text-center p-6">
+            <Camera size={48} className="mx-auto text-slate-700 mb-2" />
+            <p className="text-slate-500 text-sm font-medium">{error || 'Camera is inactive'}</p>
+          </div>
+        )}
+        
+        {/* Controls */}
+        <div className="absolute bottom-4 left-0 right-0 flex justify-center space-x-4">
+          {!stream && !capturedImage && (
+            <button onClick={startCamera} className="bg-slate-800 text-white px-6 py-2 rounded-full font-bold text-sm hover:bg-slate-700 transition-colors">
+              Start Camera
+            </button>
+          )}
+          {stream && (
+            <>
+              <button onClick={stopCamera} className="bg-red-500/80 text-white p-3 rounded-full hover:bg-red-600 transition-colors">
+                <X size={20} />
+              </button>
+              <button onClick={capture} className="bg-white text-primary p-4 rounded-full shadow-lg hover:scale-105 transition-transform">
+                <div className="w-12 h-12 rounded-full border-4 border-primary/30 flex items-center justify-center">
+                   <div className="w-10 h-10 bg-primary rounded-full"></div>
+                </div>
+              </button>
+            </>
+          )}
+          {capturedImage && (
+            <button onClick={retake} className="bg-white text-slate-900 px-6 py-2 rounded-full font-bold text-sm shadow-lg flex items-center space-x-2">
+              <RefreshCw size={16} />
+              <span>Retake</span>
+            </button>
+          )}
+        </div>
+      </div>
+      <canvas ref={canvasRef} className="hidden" />
+    </div>
+  );
+};
