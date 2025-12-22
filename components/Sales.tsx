@@ -20,15 +20,17 @@ import {
   Hash,
   Clock,
   FileText,
-  Calendar
+  Calendar,
+  MapPin,
+  PenTool
 } from 'lucide-react';
-import { BottomSheetModal, PrimaryButton, SecondaryButton } from './Shared';
+import { BottomSheetModal, PrimaryButton, SecondaryButton, Input, SignaturePad } from './Shared';
 
 const MOCK_CUSTOMERS = [
-  { id: '1', name: 'Kathleen Pfeffer', email: 'angela98@gmail.com', phone: '+234 801 234 5678' },
-  { id: '2', name: 'Ericka Considine', email: 'carlo34@yahoo.com', phone: '+234 702 345 6789' },
-  { id: '3', name: 'Edmond Schulist', email: 'jude_armstrong@hotmail.com', phone: '+234 903 456 7890' },
-  { id: '4', name: 'Brionna O\'Keefe', email: 'elnora@hotmail.com', phone: '+234 814 567 8901' },
+  { id: '1', name: 'Kathleen Pfeffer', email: 'angela98@gmail.com', phone: '+234 801 234 5678', address: '12 Lekki Phase 1' },
+  { id: '2', name: 'Ericka Considine', email: 'carlo34@yahoo.com', phone: '+234 702 345 6789', address: '45 Victoria Island' },
+  { id: '3', name: 'Edmond Schulist', email: 'jude_armstrong@hotmail.com', phone: '+234 903 456 7890', address: '8 Ikeja GRA' },
+  { id: '4', name: 'Brionna O\'Keefe', email: 'elnora@hotmail.com', phone: '+234 814 567 8901', address: '22 Yaba Tech' },
 ];
 
 const MOCK_INVENTORY = [
@@ -75,6 +77,11 @@ const Sales: React.FC = () => {
   const [assignedDevices, setAssignedDevices] = useState<string[]>([]);
   const [paymentPlan, setPaymentPlan] = useState('OUTRIGHT');
   const [selectionMode, setSelectionMode] = useState<'PACKAGE' | 'ITEMS'>('PACKAGE');
+  
+  // New States for Extended Flow
+  const [installAddress, setInstallAddress] = useState('');
+  const [installDate, setInstallDate] = useState('');
+  const [signature, setSignature] = useState<string | null>(null);
 
   // Wizard Search States
   const [custSearch, setCustSearch] = useState('');
@@ -92,6 +99,9 @@ const Sales: React.FC = () => {
     setAssignedDevices([]);
     setPaymentPlan('OUTRIGHT');
     setSelectionMode('PACKAGE');
+    setInstallAddress('');
+    setInstallDate('');
+    setSignature(null);
     setCustSearch('');
     setPkgSearch('');
     setInvSearch('');
@@ -156,6 +166,34 @@ const Sales: React.FC = () => {
 
   const totalPages = Math.ceil(filteredSales.length / ITEMS_PER_PAGE);
 
+  // Flow Navigation Logic
+  const handleNext = () => {
+    if (wizardStep === 1 && selectedCustomer) {
+        setInstallAddress(selectedCustomer.address || ''); 
+        setWizardStep(2);
+    } 
+    else if (wizardStep === 2) setWizardStep(3); // To Logistics
+    else if (wizardStep === 3) setWizardStep(needsDevices ? 4 : 5); // Skip HW if not needed
+    else if (wizardStep === 4) setWizardStep(5); // To Contract
+    else if (wizardStep === 5) setWizardStep(6); // To Final
+    else completeSale();
+  };
+
+  const handleBack = () => {
+      if (wizardStep === 5 && !needsDevices) setWizardStep(3);
+      else setWizardStep(prev => prev - 1);
+  };
+
+  // Step Validation
+  const isStepValid = () => {
+      if (wizardStep === 1) return !!selectedCustomer;
+      if (wizardStep === 2) return cart.length > 0 || !!selectedPackage;
+      if (wizardStep === 3) return installAddress.length > 3 && !!installDate;
+      if (wizardStep === 4) return true; // Optional generally, or validated by logic
+      if (wizardStep === 5) return !!signature;
+      return true;
+  };
+
   return (
     <div className="space-y-6 sm:space-y-8 animate-in slide-in-from-left-4 duration-500 pb-20 lg:pb-0">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -205,18 +243,22 @@ const Sales: React.FC = () => {
             <div className="flex items-center justify-between mb-6 sm:mb-8">
               <div className="flex items-center space-x-3 sm:space-x-5">
                 {!isSuccess && wizardStep > 1 && (
-                  <button onClick={() => setWizardStep(wizardStep - 1)} className="p-2 hover:bg-white/10 rounded-full transition-colors"><ChevronLeft size={24} /></button>
+                  <button onClick={handleBack} className="p-2 hover:bg-white/10 rounded-full transition-colors"><ChevronLeft size={24} /></button>
                 )}
                 <h3 className="text-xl sm:text-2xl font-bold tracking-tight uppercase italic">
-                  {isSuccess ? 'Confirmed' : `Step ${wizardStep}`}
+                  {isSuccess ? 'Confirmed' : `Step ${wizardStep} of 6`}
                 </h3>
               </div>
               <button onClick={resetWizard} className="p-2 hover:bg-white/10 rounded-full transition-colors"><X size={24} /></button>
             </div>
             {!isSuccess && (
-              <div className="flex items-center space-x-2 px-1">
-                {[1, 2, 3, 4].map(s => (
-                  <div key={s} className={`h-1.5 sm:h-2 rounded-full transition-all duration-500 ${wizardStep >= s ? 'bg-ubuxa-blue w-8 sm:w-12 shadow-ubuxa-blue/50 shadow-lg' : 'bg-slate-700 w-3 sm:w-4'}`}></div>
+              <div className="flex items-center space-x-1.5 px-1">
+                {[1, 2, 3, 4, 5, 6].map(s => (
+                  <div key={s} className={`h-1.5 rounded-full transition-all duration-500 ${
+                    wizardStep >= s 
+                      ? 'bg-ubuxa-blue shadow-ubuxa-blue/50 shadow-lg' 
+                      : 'bg-slate-700'
+                  } ${wizardStep === s ? 'w-8 sm:w-10' : 'w-2 sm:w-3'}`}></div>
                 ))}
               </div>
             )}
@@ -237,6 +279,7 @@ const Sales: React.FC = () => {
               </div>
             ) : (
               <>
+                {/* Step 1: Customer Selection */}
                 {wizardStep === 1 && (
                   <div className="space-y-6 sm:space-y-8 animate-in slide-in-from-right-4 duration-300">
                     <div className="text-center mb-2">
@@ -257,7 +300,7 @@ const Sales: React.FC = () => {
                       {filteredCustomers.map(customer => (
                         <button 
                           key={customer.id}
-                          onClick={() => { setSelectedCustomer(customer); setWizardStep(2); }}
+                          onClick={() => { setSelectedCustomer(customer); setInstallAddress(customer.address); setWizardStep(2); }}
                           className={`w-full p-4 sm:p-6 rounded-[1.5rem] sm:rounded-[2rem] border-2 transition-all flex items-center justify-between group text-left active:scale-[0.98] ${selectedCustomer?.id === customer.id ? 'border-ubuxa-blue bg-blue-50 dark:bg-blue-900/30 shadow-xl' : 'border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-800 hover:border-ubuxa-blue/50'}`}
                         >
                           <div className="flex items-center space-x-3 sm:space-x-5 min-w-0">
@@ -274,6 +317,7 @@ const Sales: React.FC = () => {
                   </div>
                 )}
 
+                {/* Step 2: Inventory Selection */}
                 {wizardStep === 2 && (
                   <div className="space-y-6 sm:space-y-8 animate-in slide-in-from-right-4 duration-300">
                     <div className="text-center">
@@ -344,7 +388,46 @@ const Sales: React.FC = () => {
                   </div>
                 )}
 
+                {/* Step 3: Installation Logistics (NEW) */}
                 {wizardStep === 3 && (
+                  <div className="space-y-6 sm:space-y-8 animate-in slide-in-from-right-4 duration-300">
+                    <div className="text-center">
+                      <h4 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">Installation Logistics</h4>
+                      <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium">Schedule the deployment details</p>
+                    </div>
+
+                    <div className="space-y-6">
+                        <Input 
+                            label="Installation Address" 
+                            icon={<MapPin size={18} />} 
+                            value={installAddress}
+                            onChange={(e) => setInstallAddress(e.target.value)}
+                            placeholder="Enter street address"
+                        />
+                        <Input 
+                            label="Preferred Date" 
+                            type="date"
+                            icon={<Calendar size={18} />} 
+                            value={installDate}
+                            onChange={(e) => setInstallDate(e.target.value)}
+                        />
+                        <div className="bg-slate-50 dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700">
+                            <div className="flex items-start space-x-3">
+                                <Clock className="text-ubuxa-blue mt-0.5" size={18} />
+                                <div>
+                                    <h5 className="font-bold text-slate-900 dark:text-white text-sm">Deployment SLA</h5>
+                                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+                                        Standard installation takes 4-6 hours. Please ensure the site is accessible during this window.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Step 4: Hardware Assignment (Shifted) */}
+                {wizardStep === 4 && (
                   <div className="space-y-6 sm:space-y-8 animate-in slide-in-from-right-4 duration-300">
                     <div className="text-center">
                       <h4 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">Hardware Assignment</h4>
@@ -373,7 +456,40 @@ const Sales: React.FC = () => {
                   </div>
                 )}
 
-                {wizardStep === 4 && (
+                {/* Step 5: Digital Contract (NEW) */}
+                {wizardStep === 5 && (
+                  <div className="space-y-6 sm:space-y-8 animate-in slide-in-from-right-4 duration-300">
+                    <div className="text-center">
+                      <h4 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">Digital Contract</h4>
+                      <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium">Customer acknowledgement of terms</p>
+                    </div>
+
+                    <div className="space-y-4">
+                        <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl text-xs text-slate-600 dark:text-slate-300 leading-relaxed border border-slate-200 dark:border-slate-700 h-32 overflow-y-auto">
+                            <p><strong>1. Payment Obligations:</strong> The customer agrees to the total valuation of ₦{totalPrice.toLocaleString()}. For financed plans, monthly remittances must be made by the 5th of each month.</p>
+                            <p className="mt-2"><strong>2. Ownership:</strong> Title to the equipment remains with UBUXA until full payment is completed. Any attempt to tamper with the device lock will void warranty.</p>
+                            <p className="mt-2"><strong>3. Service:</strong> UBUXA provides 1 year of free maintenance. Physical damage is not covered.</p>
+                        </div>
+                        
+                        <div className="flex items-center space-x-2 text-xs font-bold text-slate-900 dark:text-white">
+                            <PenTool size={16} className="text-ubuxa-blue" />
+                            <span>Customer Signature</span>
+                        </div>
+                        <SignaturePad 
+                            onChange={(sig) => setSignature(sig)} 
+                        />
+                        {signature && (
+                            <div className="flex items-center space-x-2 text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 p-2 rounded-lg text-xs font-bold justify-center">
+                                <CheckCircle2 size={14} />
+                                <span>Signature Captured</span>
+                            </div>
+                        )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Step 6: Final Valuation (Shifted) */}
+                {wizardStep === 6 && (
                   <div className="space-y-6 sm:space-y-8 animate-in slide-in-from-right-4 duration-300">
                     <div className="bg-ubuxa-gradient p-8 sm:p-12 rounded-[2rem] sm:rounded-[3.5rem] text-white text-center shadow-2xl relative overflow-hidden">
                       <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '30px 30px' }} />
@@ -385,6 +501,13 @@ const Sales: React.FC = () => {
                       <div className="bg-white dark:bg-slate-800 p-6 sm:p-8 rounded-[1.5rem] sm:rounded-[3rem] space-y-4 sm:space-y-6 shadow-sm border border-slate-100 dark:border-slate-700">
                          <div className="flex justify-between items-center"><span className="text-[10px] sm:text-[11px] font-black text-slate-400 uppercase tracking-widest">Client</span><span className="text-slate-900 dark:text-white font-bold text-sm">{selectedCustomer?.name}</span></div>
                          <div className="flex justify-between items-start border-t border-slate-100 dark:border-slate-700 pt-4 sm:pt-6"><span className="text-[10px] sm:text-[11px] font-black text-slate-400 uppercase tracking-widest">Config</span><span className="text-slate-900 dark:text-white font-bold text-right max-w-[150px] sm:max-w-[200px] text-xs sm:text-sm line-clamp-2">{selectionMode === 'PACKAGE' ? selectedPackage?.name : cart.map(i => `${i.quantity}x ${i.name}`).join(', ')}</span></div>
+                         <div className="flex justify-between items-center border-t border-slate-100 dark:border-slate-700 pt-4 sm:pt-6">
+                            <span className="text-[10px] sm:text-[11px] font-black text-slate-400 uppercase tracking-widest">Install</span>
+                            <div className="text-right">
+                                <span className="block text-slate-900 dark:text-white font-bold text-sm">{installDate}</span>
+                                <span className="block text-xs text-slate-500 truncate max-w-[150px]">{installAddress}</span>
+                            </div>
+                         </div>
                       </div>
                     </div>
 
@@ -404,16 +527,11 @@ const Sales: React.FC = () => {
           {!isSuccess && (
             <div className="p-6 sm:p-10 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shrink-0">
               <button 
-                disabled={(wizardStep === 1 && !selectedCustomer) || (wizardStep === 2 && cart.length === 0 && !selectedPackage)}
-                onClick={() => {
-                  if (wizardStep === 1) setWizardStep(2);
-                  else if (wizardStep === 2) setWizardStep(needsDevices ? 3 : 4);
-                  else if (wizardStep === 3) setWizardStep(4);
-                  else completeSale();
-                }}
+                disabled={!isStepValid()}
+                onClick={handleNext}
                 className="w-full bg-slate-900 dark:bg-slate-800 text-white py-4 sm:py-5 rounded-xl sm:rounded-2xl font-bold text-base sm:text-lg shadow-xl disabled:opacity-40 transition-all active:scale-95"
               >
-                {wizardStep === 4 ? 'Confirm & Deploy' : 'Continue'}
+                {wizardStep === 6 ? 'Confirm & Deploy' : 'Continue'}
               </button>
             </div>
           )}
