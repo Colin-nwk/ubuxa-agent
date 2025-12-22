@@ -84,7 +84,7 @@ const Inventory: React.FC = () => {
             onClick={() => setIsRequestDrawerOpen(true)}
             className="bg-ubuxa-gradient text-white px-6 sm:px-8 py-3.5 sm:py-4 rounded-xl sm:rounded-2xl font-bold flex items-center justify-center space-x-2 sm:space-x-3 shadow-xl shadow-ubuxa-blue/20 hover:scale-[1.02] transition-all active:scale-95 text-sm sm:text-base"
           >
-            <Plus size={20} sm={22} strokeWidth={3} />
+            <Plus size={20} strokeWidth={3} />
             <span>Restock Hub</span>
           </button>
         </div>
@@ -115,7 +115,7 @@ const Inventory: React.FC = () => {
                     <span className={`text-xl sm:text-2xl font-black mt-1 ${item.stock < 10 ? 'text-red-500' : 'text-slate-900 dark:text-white'}`}>{item.stock}</span>
                   </div>
                   <button className="w-12 h-12 sm:w-14 sm:h-14 bg-slate-50 dark:bg-slate-800 text-slate-400 dark:text-slate-500 rounded-xl sm:rounded-2xl flex items-center justify-center hover:bg-ubuxa-gradient hover:text-white transition-all shadow-inner active:scale-90">
-                    <ShoppingBag size={20} sm={24} />
+                    <ShoppingBag size={20} />
                   </button>
                 </div>
               </div>
@@ -131,7 +131,7 @@ const Inventory: React.FC = () => {
                   req.status === 'PENDING' ? 'bg-slate-100 dark:bg-slate-800 text-slate-400' : 
                   req.status === 'SHIPPED' ? 'bg-blue-50 dark:bg-blue-900/30 text-ubuxa-blue' : 'bg-blue-100 dark:bg-blue-900/50 text-ubuxa-blue'
                 }`}>
-                  {req.status === 'PENDING' ? <Clock size={24} sm={32} /> : req.status === 'SHIPPED' ? <Truck size={24} sm={32} /> : <CheckCircle2 size={24} sm={32} />}
+                  {req.status === 'PENDING' ? <Clock size={24} /> : req.status === 'SHIPPED' ? <Truck size={24} /> : <CheckCircle2 size={24} />}
                 </div>
                 
                 <div className="flex-1 min-w-0">
@@ -142,7 +142,7 @@ const Inventory: React.FC = () => {
                   
                   <div className="flex items-center space-x-4 sm:space-x-6 text-slate-500 dark:text-slate-400 overflow-hidden">
                     <p className="text-[11px] sm:text-sm font-medium flex items-center space-x-1.5 truncate">
-                       <Building2 size={14} sm={16} className="text-ubuxa-blue shrink-0" />
+                       <Building2 size={14} className="text-ubuxa-blue shrink-0" />
                        <span className="truncate">{req.store}</span>
                     </p>
                     <div className="h-3 sm:h-4 w-px bg-slate-200 dark:bg-slate-700 shrink-0"></div>
@@ -170,7 +170,7 @@ const Inventory: React.FC = () => {
                   </button>
                 ) : (
                   <div className="w-10 h-10 sm:w-12 sm:h-12 bg-slate-50 dark:bg-slate-800 rounded-lg sm:rounded-2xl flex items-center justify-center text-slate-300 dark:text-slate-600 group-hover:bg-ubuxa-blue group-hover:text-white transition-all shadow-sm">
-                    <ChevronRightIcon size={20} sm={24} />
+                    <ChevronRightIcon size={20} />
                   </div>
                 )}
               </div>
@@ -191,14 +191,14 @@ const Inventory: React.FC = () => {
               disabled={currentPage === 1}
               className="w-10 h-10 sm:w-12 sm:h-12 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl sm:rounded-2xl flex items-center justify-center text-slate-400 hover:text-ubuxa-blue active:scale-90 disabled:opacity-30 transition-all"
             >
-              <ChevronLeftIcon size={18} sm={22} />
+              <ChevronLeftIcon size={18} />
             </button>
             <button 
               onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
               className="w-10 h-10 sm:w-12 sm:h-12 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl sm:rounded-2xl flex items-center justify-center text-slate-400 hover:text-ubuxa-blue active:scale-90 disabled:opacity-30 transition-all"
             >
-              <ChevronRightIcon size={18} sm={22} />
+              <ChevronRightIcon size={18} />
             </button>
           </div>
         </div>

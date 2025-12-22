@@ -135,7 +135,7 @@ const Dashboard: React.FC = () => {
 const ActivityItem: React.FC<{ title: string, subtitle: string, time: string, status: 'SUCCESS' | 'PENDING' }> = ({ title, subtitle, time, status }) => (
   <div className="flex items-center space-x-4 sm:space-x-5 group cursor-pointer active:bg-slate-50 dark:active:bg-slate-800 rounded-xl transition-all">
     <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center transition-all shrink-0 ${status === 'SUCCESS' ? 'bg-blue-50 dark:bg-blue-900/30 text-primary' : 'bg-orange-50 dark:bg-orange-900/30 text-orange-600'} group-hover:scale-110 shadow-sm`}>
-      <ShoppingCart size={18} sm={20} />
+      <ShoppingCart size={18} />
     </div>
     <div className="flex-1 min-w-0">
       <h4 className="text-sm font-bold text-slate-900 dark:text-white leading-none group-hover:text-primary transition-colors truncate">{title}</h4>

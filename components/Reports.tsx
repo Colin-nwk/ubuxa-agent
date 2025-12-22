@@ -31,7 +31,8 @@ const trendData = [
   { name: 'Week 6', revenue: 3200000 },
 ];
 
-const COLORS = ['#0077C2', '#00A3E0', '#0f172a', '#0077C2', '#00A3E0', '#0f172a'];
+// Updated Colors: Primary (Teal), Secondary (Teal Light), Accent (Amber)
+const COLORS = ['#0F766E', '#14B8A6', '#F59E0B', '#0F766E', '#14B8A6', '#F59E0B'];
 
 const Reports: React.FC = () => {
   return (
@@ -71,8 +72,8 @@ const Reports: React.FC = () => {
                 <AreaChart data={trendData}>
                   <defs>
                     <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#0077C2" stopOpacity={0.2}/>
-                      <stop offset="95%" stopColor="#0077C2" stopOpacity={0}/>
+                      <stop offset="5%" stopColor="#0F766E" stopOpacity={0.2}/>
+                      <stop offset="95%" stopColor="#0F766E" stopOpacity={0}/>
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#334155" opacity={0.2} />
@@ -81,7 +82,7 @@ const Reports: React.FC = () => {
                   <Tooltip 
                     contentStyle={{ borderRadius: '24px', border: 'none', boxShadow: '0 25px 50px -12px rgb(0 0 0 / 0.15)', fontWeight: 700, backgroundColor: 'rgba(255, 255, 255, 0.9)', color: '#0f172a' }}
                   />
-                  <Area type="monotone" dataKey="revenue" stroke="#0077C2" strokeWidth={5} fillOpacity={1} fill="url(#colorRev)" />
+                  <Area type="monotone" dataKey="revenue" stroke="#0F766E" strokeWidth={5} fillOpacity={1} fill="url(#colorRev)" />
                 </AreaChart>
              </ResponsiveContainer>
           </div>

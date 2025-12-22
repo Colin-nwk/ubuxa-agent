@@ -162,7 +162,7 @@ const Sales: React.FC = () => {
           onClick={() => setShowDrawer(true)}
           className="bg-ubuxa-gradient text-white px-6 sm:px-8 py-3 sm:py-4 rounded-xl sm:rounded-2xl font-bold flex items-center justify-center space-x-2 sm:space-x-3 shadow-xl shadow-ubuxa-blue/20 hover:scale-[1.02] transition-all active:scale-95 text-sm sm:text-base"
         >
-          <Plus size={20} sm={22} strokeWidth={3} />
+          <Plus size={20} strokeWidth={3} />
           <span>New Sale</span>
         </button>
       </div>
@@ -200,13 +200,13 @@ const Sales: React.FC = () => {
             <div className="flex items-center justify-between mb-6 sm:mb-8">
               <div className="flex items-center space-x-3 sm:space-x-5">
                 {!isSuccess && wizardStep > 1 && (
-                  <button onClick={() => setWizardStep(wizardStep - 1)} className="p-2 hover:bg-white/10 rounded-full transition-colors"><ChevronLeft size={24} sm={28} /></button>
+                  <button onClick={() => setWizardStep(wizardStep - 1)} className="p-2 hover:bg-white/10 rounded-full transition-colors"><ChevronLeft size={24} /></button>
                 )}
                 <h3 className="text-xl sm:text-2xl font-bold tracking-tight uppercase italic">
                   {isSuccess ? 'Confirmed' : `Step ${wizardStep}`}
                 </h3>
               </div>
-              <button onClick={resetWizard} className="p-2 hover:bg-white/10 rounded-full transition-colors"><X size={24} sm={28} /></button>
+              <button onClick={resetWizard} className="p-2 hover:bg-white/10 rounded-full transition-colors"><X size={24} /></button>
             </div>
             {!isSuccess && (
               <div className="flex items-center space-x-2 px-1">
@@ -220,7 +220,7 @@ const Sales: React.FC = () => {
           <div className="flex-1 overflow-y-auto p-5 sm:p-10 space-y-6 sm:space-y-8 bg-slate-50/40 dark:bg-slate-950/20 no-scrollbar">
             {isSuccess ? (
               <div className="flex flex-col items-center justify-center h-full text-center space-y-6 sm:space-y-8 animate-in zoom-in-95 duration-500">
-                <div className="w-20 h-20 sm:w-28 sm:h-28 bg-blue-50 dark:bg-blue-900/30 text-ubuxa-blue rounded-3xl flex items-center justify-center shadow-xl shadow-blue-100 dark:shadow-blue-900/20"><CheckCircle2 size={40} sm={56} /></div>
+                <div className="w-20 h-20 sm:w-28 sm:h-28 bg-blue-50 dark:bg-blue-900/30 text-ubuxa-blue rounded-3xl flex items-center justify-center shadow-xl shadow-blue-100 dark:shadow-blue-900/20"><CheckCircle2 size={40} /></div>
                 <div>
                    <h4 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Deployment Logged</h4>
                    <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400 font-medium mt-2 sm:mt-3 px-4">Transaction validated and archived successfully.</p>
@@ -256,13 +256,13 @@ const Sales: React.FC = () => {
                           className={`w-full p-4 sm:p-6 rounded-[1.5rem] sm:rounded-[2rem] border-2 transition-all flex items-center justify-between group text-left active:scale-[0.98] ${selectedCustomer?.id === customer.id ? 'border-ubuxa-blue bg-blue-50 dark:bg-blue-900/30 shadow-lg' : 'border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-800 hover:border-ubuxa-blue/50'}`}
                         >
                           <div className="flex items-center space-x-3 sm:space-x-5 min-w-0">
-                            <div className={`w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl flex items-center justify-center transition-all shrink-0 ${selectedCustomer?.id === customer.id ? 'bg-ubuxa-blue text-white shadow-lg' : 'bg-slate-100 dark:bg-slate-700 text-slate-400 group-hover:bg-slate-900 dark:group-hover:bg-slate-900 group-hover:text-white'}`}><User size={20} sm={24} /></div>
+                            <div className={`w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl flex items-center justify-center transition-all shrink-0 ${selectedCustomer?.id === customer.id ? 'bg-ubuxa-blue text-white shadow-lg' : 'bg-slate-100 dark:bg-slate-700 text-slate-400 group-hover:bg-slate-900 dark:group-hover:bg-slate-900 group-hover:text-white'}`}><User size={20} /></div>
                             <div className="min-w-0">
                                <p className={`font-bold text-base sm:text-lg truncate ${selectedCustomer?.id === customer.id ? 'text-ubuxa-blue' : 'text-slate-900 dark:text-white'}`}>{customer.name}</p>
                                <p className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-widest mt-0.5 sm:mt-1 truncate">{customer.phone}</p>
                             </div>
                           </div>
-                          {selectedCustomer?.id === customer.id && <div className="w-6 h-6 sm:w-8 sm:h-8 bg-ubuxa-blue rounded-full flex items-center justify-center text-white shrink-0"><Check size={14} sm={18} strokeWidth={4} /></div>}
+                          {selectedCustomer?.id === customer.id && <div className="w-6 h-6 sm:w-8 sm:h-8 bg-ubuxa-blue rounded-full flex items-center justify-center text-white shrink-0"><Check size={14} strokeWidth={4} /></div>}
                         </button>
                       ))}
                     </div>
@@ -306,7 +306,7 @@ const Sales: React.FC = () => {
                             </div>
                             {selectedPackage?.id === pkg.id && (
                                <div className="absolute top-3 right-3 sm:top-4 sm:right-4 animate-in zoom-in">
-                                  <div className="w-5 h-5 sm:w-6 sm:h-6 bg-ubuxa-blue rounded-full flex items-center justify-center text-white"><Check size={12} sm={14} strokeWidth={4} /></div>
+                                  <div className="w-5 h-5 sm:w-6 sm:h-6 bg-ubuxa-blue rounded-full flex items-center justify-center text-white"><Check size={12} strokeWidth={4} /></div>
                                </div>
                             )}
                           </button>
@@ -320,7 +320,7 @@ const Sales: React.FC = () => {
                           return (
                             <div key={item.id} className={`p-4 sm:p-6 border-2 rounded-[1.5rem] sm:rounded-[2rem] flex items-center justify-between transition-all ${isActive ? 'bg-blue-50 dark:bg-blue-900/30 border-ubuxa-blue shadow-lg' : 'bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-800'}`}>
                               <div className="flex items-center space-x-3 sm:space-x-5 min-w-0">
-                                <div className={`w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-inner transition-colors shrink-0 ${isActive ? 'bg-ubuxa-blue text-white' : 'bg-slate-50 dark:bg-slate-700 text-slate-400'}`}><Package size={20} sm={28} /></div>
+                                <div className={`w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-inner transition-colors shrink-0 ${isActive ? 'bg-ubuxa-blue text-white' : 'bg-slate-50 dark:bg-slate-700 text-slate-400'}`}><Package size={20} /></div>
                                 <div className="min-w-0">
                                    <p className="font-bold text-slate-900 dark:text-white text-sm truncate">{item.name}</p>
                                    <p className="text-[10px] sm:text-[11px] text-ubuxa-blue font-black tracking-tight mt-0.5">₦{item.price.toLocaleString()}</p>
@@ -329,7 +329,7 @@ const Sales: React.FC = () => {
                               <div className="flex items-center space-x-2 sm:space-x-3 bg-white dark:bg-slate-900 p-1.5 sm:p-2 rounded-xl sm:rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
                                 <button onClick={() => updateCart(item, -1)} className="w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center text-slate-400 hover:text-red-500 active:scale-90 transition-colors"><Minus size={16} /></button>
                                 <span className="text-xs sm:text-sm font-black w-4 sm:w-6 text-center text-slate-900 dark:text-white">{cartItem?.quantity || 0}</span>
-                                <button onClick={() => updateCart(item, 1)} className="w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center text-ubuxa-blue active:scale-125 transition-all"><Plus size={16} sm={18} strokeWidth={3} /></button>
+                                <button onClick={() => updateCart(item, 1)} className="w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center text-ubuxa-blue active:scale-125 transition-all"><Plus size={16} strokeWidth={3} /></button>
                               </div>
                             </div>
                           );
@@ -353,14 +353,14 @@ const Sales: React.FC = () => {
                           className={`w-full p-4 sm:p-6 rounded-[1.5rem] sm:rounded-[2.5rem] border-2 text-left transition-all flex items-center justify-between group active:scale-[0.98] ${assignedDevices.includes(dev.sn) ? 'border-ubuxa-blue bg-blue-50 dark:bg-blue-900/30 shadow-xl' : 'border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-800 hover:border-ubuxa-blue/50'}`}
                         >
                           <div className="flex items-center space-x-4 sm:space-x-5 min-w-0">
-                            <div className={`w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl flex items-center justify-center transition-colors shrink-0 ${assignedDevices.includes(dev.sn) ? 'bg-ubuxa-blue text-white' : 'bg-slate-50 dark:bg-slate-700 text-slate-400'}`}><Smartphone size={20} sm={28} /></div>
+                            <div className={`w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl flex items-center justify-center transition-colors shrink-0 ${assignedDevices.includes(dev.sn) ? 'bg-ubuxa-blue text-white' : 'bg-slate-50 dark:bg-slate-700 text-slate-400'}`}><Smartphone size={20} /></div>
                             <div className="min-w-0">
                                <p className="font-mono font-black text-slate-900 dark:text-white text-sm sm:text-[15px] truncate">{dev.sn}</p>
                                <p className="text-[9px] sm:text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5 truncate">{dev.model}</p>
                             </div>
                           </div>
                           <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl border-2 flex items-center justify-center transition-all shrink-0 ${assignedDevices.includes(dev.sn) ? 'bg-ubuxa-blue border-ubuxa-blue shadow-lg' : 'border-slate-200 dark:border-slate-700'}`}>
-                             {assignedDevices.includes(dev.sn) && <Check size={14} sm={18} className="text-white" strokeWidth={4} />}
+                             {assignedDevices.includes(dev.sn) && <Check size={14} className="text-white" strokeWidth={4} />}
                           </div>
                         </button>
                       ))}
@@ -419,7 +419,7 @@ const Sales: React.FC = () => {
       <div className="bg-white dark:bg-slate-900 rounded-[2rem] sm:rounded-[3.5rem] shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden">
         <div className="p-6 sm:p-10 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center space-x-3">
-             <div className="p-2 sm:p-3 bg-blue-50 dark:bg-blue-900/30 text-ubuxa-blue rounded-lg sm:rounded-xl shrink-0"><Hash size={18} sm={20} /></div>
+             <div className="p-2 sm:p-3 bg-blue-50 dark:bg-blue-900/30 text-ubuxa-blue rounded-lg sm:rounded-xl shrink-0"><Hash size={18} /></div>
              <h3 className="font-bold text-slate-900 dark:text-white text-base sm:text-lg">Recent Archive</h3>
           </div>
           <div className="relative group w-full sm:max-w-xs">
@@ -437,7 +437,7 @@ const Sales: React.FC = () => {
           {filteredSales.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE).map((sale) => (
             <div key={sale.id} className="p-5 sm:p-8 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800 transition-all cursor-pointer group active:bg-slate-100 dark:active:bg-slate-800">
               <div className="flex items-center space-x-4 sm:space-x-8 min-w-0">
-                <div className={`w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl flex items-center justify-center transition-all shadow-sm shrink-0 ${sale.status === 'COMPLETED' ? 'bg-blue-50 dark:bg-blue-900/30 text-ubuxa-blue' : 'bg-slate-100 dark:bg-slate-800 text-slate-400'}`}><ShoppingCart size={20} sm={24} /></div>
+                <div className={`w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl flex items-center justify-center transition-all shadow-sm shrink-0 ${sale.status === 'COMPLETED' ? 'bg-blue-50 dark:bg-blue-900/30 text-ubuxa-blue' : 'bg-slate-100 dark:bg-slate-800 text-slate-400'}`}><ShoppingCart size={20} /></div>
                 <div className="min-w-0">
                    <h4 className="font-bold text-slate-900 dark:text-white text-sm sm:text-lg group-hover:text-ubuxa-blue transition-colors tracking-tight truncate">{sale.customer}</h4>
                    <p className="text-[9px] sm:text-[10px] text-slate-400 font-black uppercase tracking-widest mt-1 truncate">{sale.product} • <span className="text-slate-500">{sale.id}</span></p>
@@ -448,7 +448,7 @@ const Sales: React.FC = () => {
                    <p className="font-black text-slate-900 dark:text-white text-lg italic tracking-tight">₦{sale.amount.toLocaleString()}</p>
                    <p className="text-[10px] text-slate-400 font-bold uppercase mt-1">{sale.date}</p>
                 </div>
-                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-slate-50 dark:bg-slate-800 rounded-lg sm:rounded-xl flex items-center justify-center text-slate-300 dark:text-slate-600 group-hover:bg-ubuxa-blue group-hover:text-white transition-all"><ChevronRightIcon size={18} sm={22} /></div>
+                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-slate-50 dark:bg-slate-800 rounded-lg sm:rounded-xl flex items-center justify-center text-slate-300 dark:text-slate-600 group-hover:bg-ubuxa-blue group-hover:text-white transition-all"><ChevronRightIcon size={18} /></div>
               </div>
             </div>
           ))}

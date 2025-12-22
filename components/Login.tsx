@@ -50,7 +50,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
               </div>
               
               <div className="relative group">
-                <Smartphone className="absolute left-4 sm:left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-ubuxa-blue transition-colors" size={20} sm={22} />
+                <Smartphone className="absolute left-4 sm:left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-ubuxa-blue transition-colors" size={20} />
                 <input 
                   type="tel" 
                   required
@@ -78,7 +78,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
               </div>
               
               <div className="relative group">
-                <Lock className="absolute left-4 sm:left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-ubuxa-blue transition-colors" size={20} sm={22} />
+                <Lock className="absolute left-4 sm:left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-ubuxa-blue transition-colors" size={20} />
                 <input 
                   type="text" 
                   required

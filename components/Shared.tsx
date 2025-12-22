@@ -91,7 +91,7 @@ export const SideDrawer: React.FC<SideDrawerProps> = ({
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-xl sm:text-2xl font-bold tracking-tight uppercase italic">{title}</h3>
             <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-full transition-colors">
-              <X size={24} sm={28} />
+              <X size={24} />
             </button>
           </div>
           {subtitle && <p className="text-slate-400 text-xs sm:text-sm font-medium leading-relaxed">{subtitle}</p>}
@@ -104,6 +104,58 @@ export const SideDrawer: React.FC<SideDrawerProps> = ({
             {footer}
           </div>
         )}
+      </div>
+    </div>
+  );
+};
+
+// --- BOTTOM SHEET MODAL ---
+interface BottomSheetModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  children: React.ReactNode;
+  title?: string;
+}
+
+export const BottomSheetModal: React.FC<BottomSheetModalProps> = ({ isOpen, onClose, children, title }) => {
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [isOpen]);
+
+  return (
+    <div className={`fixed inset-0 z-[200] flex justify-center items-end sm:items-center transition-visibility duration-300 ${isOpen ? 'visible' : 'invisible'}`}>
+      <div 
+        className={`absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0'}`} 
+        onClick={onClose}
+      />
+      <div 
+        className={`relative w-full sm:max-w-lg bg-white dark:bg-slate-900 rounded-t-[2.5rem] sm:rounded-[2.5rem] shadow-2xl transform transition-transform duration-500 cubic-bezier(0.32, 0.72, 0, 1) ${isOpen ? 'translate-y-0' : 'translate-y-full sm:translate-y-10 sm:opacity-0 sm:scale-95'}`}
+        style={{ maxHeight: '85vh' }}
+      >
+        <div className="flex flex-col h-full max-h-[85vh]">
+          {/* Swipe Handle for Mobile */}
+          <div className="w-full flex justify-center pt-4 pb-2 sm:hidden cursor-pointer" onClick={onClose}>
+             <div className="w-12 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full" />
+          </div>
+          
+          {/* Header */}
+          <div className="px-6 py-4 flex items-center justify-between border-b border-slate-100 dark:border-slate-800 shrink-0">
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white">{title || 'Details'}</h3>
+            <button onClick={onClose} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors text-slate-400">
+              <X size={20} />
+            </button>
+          </div>
+          
+          {/* Content */}
+          <div className="p-6 overflow-y-auto no-scrollbar">
+             {children}
+          </div>
+        </div>
       </div>
     </div>
   );
