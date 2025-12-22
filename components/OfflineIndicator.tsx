@@ -53,22 +53,26 @@ const OfflineIndicator: React.FC = () => {
       }, 2000);
   };
 
-  if (isOnline && pendingSyncs === 0 && !isSyncing) return null;
-
   return (
-    <div className={`fixed bottom-4 left-4 z-[200] flex items-center space-x-3 px-4 py-3 rounded-xl shadow-lg transition-all duration-300 ${
-        !isOnline ? 'bg-slate-900 text-white' : 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700'
+    <div className={`fixed top-3 left-1/2 -translate-x-1/2 z-[200] flex items-center space-x-2 sm:space-x-3 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full shadow-lg transition-all duration-300 ${
+        !isOnline ? 'bg-slate-900 text-white' : 'bg-white/90 dark:bg-slate-800/90 backdrop-blur-md text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700'
     }`}>
-      <div className={`p-2 rounded-full ${!isOnline ? 'bg-red-500/20 text-red-400' : 'bg-blue-50 dark:bg-blue-900/20 text-ubuxa-blue'}`}>
-         {!isOnline ? <WifiOff size={18} /> : isSyncing ? <RefreshCw size={18} className="animate-spin" /> : <Wifi size={18} />}
+      <div className={`p-1.5 rounded-full ${!isOnline ? 'bg-red-500/20 text-red-400' : isSyncing ? 'bg-blue-500/10 text-blue-500' : 'bg-green-500/10 text-green-600'}`}>
+         {!isOnline ? <WifiOff size={14} /> : isSyncing ? <RefreshCw size={14} className="animate-spin" /> : <Wifi size={14} />}
       </div>
-      <div>
-         <p className="text-xs font-bold uppercase tracking-wider">
-             {!isOnline ? 'Offline Mode' : isSyncing ? 'Syncing Data...' : 'Connection Restored'}
+      <div className="flex flex-col items-start">
+         <p className="text-[10px] font-bold uppercase tracking-wider leading-none">
+             {!isOnline ? 'Offline' : isSyncing ? 'Syncing' : 'Online'}
          </p>
-         <p className="text-[10px] opacity-80 font-medium">
-             {!isOnline ? `${pendingSyncs} actions queued` : isSyncing ? 'Uploading local changes' : `Last synced: ${lastSynced.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`}
-         </p>
+         {(!isOnline || isSyncing) ? (
+            <p className="text-[9px] opacity-80 font-medium leading-tight mt-0.5">
+                {!isOnline ? `${pendingSyncs} Queued` : 'Uploading...'}
+            </p>
+         ) : (
+            <p className="text-[9px] opacity-60 font-medium leading-tight mt-0.5 hidden sm:block">
+               System Active
+            </p>
+         )}
       </div>
     </div>
   );
