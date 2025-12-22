@@ -17,8 +17,12 @@ import {
   List,
   ChevronLeft as ChevronLeftIcon,
   ChevronRight as ChevronRightIcon,
-  Hash
+  Hash,
+  Clock,
+  FileText,
+  Calendar
 } from 'lucide-react';
+import { BottomSheetModal, PrimaryButton, SecondaryButton } from './Shared';
 
 const MOCK_CUSTOMERS = [
   { id: '1', name: 'Kathleen Pfeffer', email: 'angela98@gmail.com', phone: '+234 801 234 5678' },
@@ -62,6 +66,7 @@ const Sales: React.FC = () => {
   const [isSuccess, setIsSuccess] = useState(false);
   const [listSearchQuery, setListSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedSaleDetails, setSelectedSaleDetails] = useState<any>(null);
   
   // Wizard Selection State
   const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
@@ -435,7 +440,7 @@ const Sales: React.FC = () => {
         </div>
         <div className="divide-y divide-slate-100 dark:divide-slate-800">
           {filteredSales.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE).map((sale) => (
-            <div key={sale.id} className="p-5 sm:p-8 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800 transition-all cursor-pointer group active:bg-slate-100 dark:active:bg-slate-800">
+            <div key={sale.id} onClick={() => setSelectedSaleDetails(sale)} className="p-5 sm:p-8 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800 transition-all cursor-pointer group active:bg-slate-100 dark:active:bg-slate-800">
               <div className="flex items-center space-x-4 sm:space-x-8 min-w-0">
                 <div className={`w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl flex items-center justify-center transition-all shadow-sm shrink-0 ${sale.status === 'COMPLETED' ? 'bg-blue-50 dark:bg-blue-900/30 text-ubuxa-blue' : 'bg-slate-100 dark:bg-slate-800 text-slate-400'}`}><ShoppingCart size={20} /></div>
                 <div className="min-w-0">
@@ -463,6 +468,86 @@ const Sales: React.FC = () => {
           </div>
         )}
       </div>
+
+      <BottomSheetModal
+        isOpen={!!selectedSaleDetails}
+        onClose={() => setSelectedSaleDetails(null)}
+        title="Transaction Details"
+      >
+        {selectedSaleDetails && (
+          <div className="space-y-6">
+             {/* Status & Amount Header */}
+             <div className={`p-6 rounded-2xl flex items-center justify-between ${selectedSaleDetails.status === 'COMPLETED' ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400' : 'bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400'}`}>
+                <div className="flex items-center space-x-3">
+                   <div className={`p-2 rounded-full ${selectedSaleDetails.status === 'COMPLETED' ? 'bg-green-200 dark:bg-green-800' : 'bg-amber-200 dark:bg-amber-800'}`}>
+                      {selectedSaleDetails.status === 'COMPLETED' ? <CheckCircle2 size={20} /> : <Clock size={20} />} 
+                   </div>
+                   <div>
+                      <p className="font-bold text-sm">Status</p>
+                      <p className="text-xs font-black uppercase tracking-widest">{selectedSaleDetails.status}</p>
+                   </div>
+                </div>
+                <div className="text-right">
+                   <p className="text-sm font-medium opacity-80">Total Amount</p>
+                   <p className="text-2xl font-bold tracking-tight">₦{selectedSaleDetails.amount.toLocaleString()}</p>
+                </div>
+             </div>
+
+             {/* Customer Info */}
+             <div className="p-4 border border-slate-100 dark:border-slate-800 rounded-2xl flex items-center justify-between bg-white dark:bg-slate-900">
+                <div className="flex items-center space-x-3">
+                   <div className="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-500">
+                      <User size={20} />
+                   </div>
+                   <div>
+                      <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Customer</p>
+                      <p className="font-bold text-slate-900 dark:text-white">{selectedSaleDetails.customer}</p>
+                   </div>
+                </div>
+                <button className="text-xs font-bold text-ubuxa-blue">View Profile</button>
+             </div>
+
+             {/* Product Info */}
+             <div className="space-y-3">
+                <p className="text-xs text-slate-400 font-bold uppercase tracking-widest pl-2">Purchase Details</p>
+                <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl space-y-3">
+                   <div className="flex justify-between">
+                      <span className="text-sm text-slate-600 dark:text-slate-400">Product</span>
+                      <span className="text-sm font-bold text-slate-900 dark:text-white">{selectedSaleDetails.product}</span>
+                   </div>
+                   <div className="flex justify-between">
+                      <span className="text-sm text-slate-600 dark:text-slate-400">Date</span>
+                      <span className="text-sm font-bold text-slate-900 dark:text-white">{selectedSaleDetails.date}</span>
+                   </div>
+                   <div className="flex justify-between">
+                      <span className="text-sm text-slate-600 dark:text-slate-400">Payment Plan</span>
+                      <span className="text-sm font-bold text-slate-900 dark:text-white">{selectedSaleDetails.paymentPlan}</span>
+                   </div>
+                </div>
+             </div>
+
+             {/* Associated Devices */}
+             {selectedSaleDetails.devices && selectedSaleDetails.devices.length > 0 && (
+               <div className="space-y-3">
+                  <p className="text-xs text-slate-400 font-bold uppercase tracking-widest pl-2">Linked Hardware</p>
+                  <div className="space-y-2">
+                     {selectedSaleDetails.devices.map((sn: string) => (
+                        <div key={sn} className="flex items-center space-x-3 p-3 border border-slate-100 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900">
+                           <Smartphone size={16} className="text-slate-400" />
+                           <span className="text-sm font-mono font-bold text-slate-700 dark:text-slate-300">{sn}</span>
+                        </div>
+                     ))}
+                  </div>
+               </div>
+             )}
+              
+             <div className="grid grid-cols-2 gap-3 pt-2">
+                <SecondaryButton icon={<FileText size={16} />}>Receipt</SecondaryButton>
+                <PrimaryButton>Support</PrimaryButton>
+             </div>
+          </div>
+        )}
+      </BottomSheetModal>
     </div>
   );
 };
