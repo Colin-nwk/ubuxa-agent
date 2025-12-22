@@ -30,6 +30,8 @@ import ComponentGallery from './components/ComponentGallery';
 import Reports from './components/Reports';
 import Transactions from './components/Transactions';
 import Notifications from './components/Notifications';
+import OfflineIndicator from './components/OfflineIndicator';
+import { initDB } from './utils/db';
 
 // Theme Context
 export const ThemeContext = createContext({
@@ -56,6 +58,11 @@ const App: React.FC = () => {
     localStorage.setItem('theme', theme);
   }, [theme]);
 
+  // Initialize DB
+  useEffect(() => {
+    initDB().catch(console.error);
+  }, []);
+
   const toggleTheme = () => {
     setTheme(prev => prev === 'light' ? 'dark' : 'light');
   };
@@ -73,6 +80,8 @@ const App: React.FC = () => {
       <Router>
         <div className="flex h-screen bg-background-light dark:bg-background-dark font-sans text-text-primary dark:text-slate-100 transition-colors duration-300">
           
+          <OfflineIndicator />
+
           {/* Desktop Sidebar */}
           <aside className="hidden lg:flex flex-col w-64 bg-slate-900 dark:bg-slate-950 text-white border-r border-slate-800">
             <div className="p-6 flex items-center space-x-3 border-b border-slate-800">

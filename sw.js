@@ -1,25 +1,26 @@
 
-const CACHE_NAME = 'ubuxa-portal-v1';
-const ASSETS_TO_CACHE = [
+const CACHE_NAME = 'ubuxa-portal-v2';
+const STATIC_ASSETS = [
   './',
   './index.html',
   './index.tsx',
   './manifest.json',
   'https://cdn.tailwindcss.com',
-  'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap'
+  'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap'
 ];
 
-// Install Event - Caching static assets
+// Install Event
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE);
+      console.log('Opened cache');
+      return cache.addAll(STATIC_ASSETS);
     })
   );
   self.skipWaiting();
 });
 
-// Activate Event - Cleaning up old caches
+// Activate Event
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
@@ -35,32 +36,40 @@ self.addEventListener('activate', (event) => {
   return self.clients.claim();
 });
 
-// Fetch Event - Stale-while-revalidate strategy
+// Fetch Event with Stale-While-Revalidate Strategy
 self.addEventListener('fetch', (event) => {
-  // Skip cross-origin requests for simple caching (except fonts/CDN)
-  if (!event.request.url.startsWith(self.location.origin) && 
-      !event.request.url.includes('tailwindcss') && 
-      !event.request.url.includes('fonts')) {
-    return;
-  }
+  // Handle cross-origin requests for ESM modules and Fonts
+  const isExternal = event.request.url.startsWith('http');
+  
+  if (isExternal || event.request.url.startsWith(self.location.origin)) {
+      event.respondWith(
+        caches.match(event.request).then((cachedResponse) => {
+          const fetchPromise = fetch(event.request).then((networkResponse) => {
+            if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic' && networkResponse.type !== 'cors') {
+                return networkResponse;
+            }
 
-  event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      const fetchPromise = fetch(event.request).then((networkResponse) => {
-        // Only cache successful GET requests
-        if (event.request.method === 'GET' && networkResponse && networkResponse.status === 200) {
-          const responseToCache = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseToCache);
+            const responseToCache = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+                cache.put(event.request, responseToCache);
+            });
+            return networkResponse;
+          }).catch(() => {
+              // Network failed
+              return cachedResponse;
           });
-        }
-        return networkResponse;
-      }).catch(() => {
-        // Fallback for network failure
-        return cachedResponse;
-      });
 
-      return cachedResponse || fetchPromise;
-    })
-  );
+          // Return cached response immediately if available (Stale), otherwise wait for network
+          return cachedResponse || fetchPromise;
+        })
+      );
+  }
+});
+
+// Sync Event for Background Sync (if supported)
+self.addEventListener('sync', (event) => {
+    if (event.tag === 'sync-sales') {
+        console.log('Background sync triggered');
+        // Logic to process indexedDB queue would go here in a full backend implementation
+    }
 });

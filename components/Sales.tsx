@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
   ShoppingCart, 
   Plus, 
@@ -25,44 +25,18 @@ import {
   PenTool
 } from 'lucide-react';
 import { BottomSheetModal, PrimaryButton, SecondaryButton, Input, SignaturePad } from './Shared';
-
-const MOCK_CUSTOMERS = [
-  { id: '1', name: 'Kathleen Pfeffer', email: 'angela98@gmail.com', phone: '+234 801 234 5678', address: '12 Lekki Phase 1' },
-  { id: '2', name: 'Ericka Considine', email: 'carlo34@yahoo.com', phone: '+234 702 345 6789', address: '45 Victoria Island' },
-  { id: '3', name: 'Edmond Schulist', email: 'jude_armstrong@hotmail.com', phone: '+234 903 456 7890', address: '8 Ikeja GRA' },
-  { id: '4', name: 'Brionna O\'Keefe', email: 'elnora@hotmail.com', phone: '+234 814 567 8901', address: '22 Yaba Tech' },
-];
-
-const MOCK_INVENTORY = [
-  { id: 'I1', name: 'Canadian Solar 450W', price: 120000, stock: 150, isSerialize: false },
-  { id: 'I2', name: 'Solar Hub Pro v2', price: 85000, stock: 45, isSerialize: true },
-  { id: 'I3', name: 'Luminous 220Ah Battery', price: 280000, stock: 12, isSerialize: false },
-  { id: 'I4', name: 'Felicity 3.5kVA Inverter', price: 450000, stock: 8, isSerialize: false },
-  { id: 'I5', name: 'Charge Controller 60A', price: 45000, stock: 25, isSerialize: false },
-];
-
-const MOCK_PACKAGES = [
-  { id: 'P1', name: 'Starter Home Bundle', items: ['2x 450W Panel', '1x Solar Hub', '1x Battery'], price: 450000 },
-  { id: 'P2', name: 'Elite Power System', items: ['4x 450W Panel', '1x Solar Hub Pro', '2x Battery'], price: 1250000 },
-  { id: 'P3', name: 'Basic Light Package', items: ['1x 200W Panel', '1x Controller', '1x LED Pack'], price: 65000 },
-];
-
-const MOCK_DEVICES = [
-  { sn: 'SN-X91-001', model: 'Solar Hub Pro v2' },
-  { sn: 'SN-X91-002', model: 'Solar Hub Pro v2' },
-  { sn: 'SN-X91-003', model: 'Solar Hub Pro v2' },
-  { sn: 'SN-X91-004', model: 'Solar Hub Pro v2' },
-  { sn: 'SN-Z88-005', model: 'Inverter Smart 5k' },
-];
-
-const MOCK_SALES = [
-  { id: 'SL-2024-001', customer: 'Kathleen Pfeffer', product: 'Starter Home Bundle', amount: 450000, status: 'COMPLETED', date: 'Oct 12, 2024', paymentPlan: 'OUTRIGHT', devices: ['SN-X91-001'] },
-  { id: 'SL-2024-002', customer: 'Ericka Considine', product: 'Solar Hub Pro v2', amount: 85000, status: 'PENDING', date: 'Oct 11, 2024', paymentPlan: 'FINANCED', devices: ['SN-X91-002'] },
-];
+import { getAllFromStore, addItemToStore, addToSyncQueue } from '../utils/db';
 
 const ITEMS_PER_PAGE = 5;
 
 const Sales: React.FC = () => {
+  // DB Data State
+  const [dbCustomers, setDbCustomers] = useState<any[]>([]);
+  const [dbInventory, setDbInventory] = useState<any[]>([]);
+  const [dbPackages, setDbPackages] = useState<any[]>([]);
+  const [dbDevices, setDbDevices] = useState<any[]>([]);
+  const [dbSales, setDbSales] = useState<any[]>([]);
+
   const [showDrawer, setShowDrawer] = useState(false);
   const [wizardStep, setWizardStep] = useState(1);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -89,6 +63,29 @@ const Sales: React.FC = () => {
   const [invSearch, setInvSearch] = useState('');
   const [devSearch, setDevSearch] = useState('');
 
+  // Fetch Data on Mount
+  useEffect(() => {
+    const fetchData = async () => {
+        try {
+            const [c, i, p, d, s] = await Promise.all([
+                getAllFromStore('customers'),
+                getAllFromStore('inventory'),
+                getAllFromStore('packages'),
+                getAllFromStore('devices'),
+                getAllFromStore('sales')
+            ]);
+            setDbCustomers(c);
+            setDbInventory(i);
+            setDbPackages(p);
+            setDbDevices(d);
+            setDbSales(s.sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime()));
+        } catch (e) {
+            console.error("Failed to load DB data", e);
+        }
+    };
+    fetchData();
+  }, [isSuccess]); // Refresh after successful sale
+
   const resetWizard = () => {
     setShowDrawer(false);
     setWizardStep(1);
@@ -108,7 +105,30 @@ const Sales: React.FC = () => {
     setDevSearch('');
   };
 
-  const completeSale = () => {
+  const completeSale = async () => {
+    const newSale = {
+        id: `SL-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`,
+        customer: selectedCustomer?.name,
+        customerId: selectedCustomer?.id,
+        product: selectionMode === 'PACKAGE' ? selectedPackage?.name : 'Custom Bundle',
+        amount: totalPrice,
+        status: navigator.onLine ? 'COMPLETED' : 'PENDING',
+        date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+        paymentPlan: paymentPlan,
+        devices: assignedDevices,
+        installAddress,
+        installDate,
+        signature
+    };
+
+    // Save to local DB
+    await addItemToStore('sales', newSale);
+
+    // If offline, add to sync queue
+    if (!navigator.onLine) {
+        await addToSyncQueue({ type: 'CREATE_SALE', payload: newSale });
+    }
+
     setTimeout(() => {
       setIsSuccess(true);
     }, 800);
@@ -141,28 +161,28 @@ const Sales: React.FC = () => {
   }, [cart, selectedPackage, selectionMode]);
 
   const filteredCustomers = useMemo(() => 
-    MOCK_CUSTOMERS.filter(c => c.name.toLowerCase().includes(custSearch.toLowerCase()) || c.phone.includes(custSearch)),
-  [custSearch]);
+    dbCustomers.filter(c => c.name.toLowerCase().includes(custSearch.toLowerCase()) || c.phone.includes(custSearch)),
+  [dbCustomers, custSearch]);
 
   const filteredPackages = useMemo(() => 
-    MOCK_PACKAGES.filter(p => p.name.toLowerCase().includes(pkgSearch.toLowerCase())),
-  [pkgSearch]);
+    dbPackages.filter(p => p.name.toLowerCase().includes(pkgSearch.toLowerCase())),
+  [dbPackages, pkgSearch]);
 
   const filteredInventory = useMemo(() => 
-    MOCK_INVENTORY.filter(i => i.name.toLowerCase().includes(invSearch.toLowerCase())),
-  [invSearch]);
+    dbInventory.filter(i => i.name.toLowerCase().includes(invSearch.toLowerCase())),
+  [dbInventory, invSearch]);
 
   const filteredDevices = useMemo(() => 
-    MOCK_DEVICES.filter(d => d.sn.toLowerCase().includes(devSearch.toLowerCase()) || d.model.toLowerCase().includes(devSearch.toLowerCase())),
-  [devSearch]);
+    dbDevices.filter(d => d.sn.toLowerCase().includes(devSearch.toLowerCase()) || d.model.toLowerCase().includes(devSearch.toLowerCase())),
+  [dbDevices, devSearch]);
 
   const filteredSales = useMemo(() => 
-    MOCK_SALES.filter(s => 
+    dbSales.filter(s => 
       s.customer.toLowerCase().includes(listSearchQuery.toLowerCase()) || 
       s.product.toLowerCase().includes(listSearchQuery.toLowerCase()) ||
       s.id.toLowerCase().includes(listSearchQuery.toLowerCase())
     ),
-  [listSearchQuery]);
+  [dbSales, listSearchQuery]);
 
   const totalPages = Math.ceil(filteredSales.length / ITEMS_PER_PAGE);
 
@@ -270,7 +290,9 @@ const Sales: React.FC = () => {
                 <div className="w-20 h-20 sm:w-28 sm:h-28 bg-blue-50 dark:bg-blue-900/30 text-ubuxa-blue rounded-3xl flex items-center justify-center shadow-xl shadow-blue-100 dark:shadow-blue-900/20"><CheckCircle2 size={40} /></div>
                 <div>
                    <h4 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Deployment Logged</h4>
-                   <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400 font-medium mt-2 sm:mt-3 px-4">Transaction validated and archived successfully.</p>
+                   <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400 font-medium mt-2 sm:mt-3 px-4">
+                     {navigator.onLine ? 'Transaction validated and archived successfully.' : 'Transaction saved offline. It will sync when connection restores.'}
+                   </p>
                 </div>
                 <div className="w-full space-y-3 sm:space-y-4 pt-6 sm:pt-10">
                    <button className="w-full bg-slate-900 dark:bg-slate-800 text-white py-4 sm:py-5 rounded-xl sm:rounded-2xl font-bold text-base sm:text-lg shadow-xl active:scale-95 transition-all">Print Receipt</button>
@@ -342,13 +364,13 @@ const Sales: React.FC = () => {
                                <div className="min-w-0">
                                   <p className={`font-bold text-base sm:text-lg truncate ${selectedPackage?.id === pkg.id ? 'text-ubuxa-blue' : 'text-slate-900 dark:text-white'}`}>{pkg.name}</p>
                                   <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-slate-400 mt-1 italic">Bundle</p>
-                               </div>
+                                </div>
                                <p className="text-ubuxa-blue font-black text-lg sm:text-xl italic shrink-0">₦{pkg.price.toLocaleString()}</p>
                             </div>
                             <div className="space-y-1.5 sm:space-y-2">
-                               {pkg.items.slice(0, 3).map((item, i) => (
+                               {pkg.items.slice(0, 3).map((item: string, i: number) => (
                                  <p key={i} className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 font-bold flex items-center truncate">
-                                   <div className={`w-1.5 h-1.5 rounded-full mr-2 sm:mr-3 shrink-0 ${selectedPackage?.id === pkg.id ? 'bg-ubuxa-blue' : 'bg-slate-300 dark:bg-slate-600'}`}></div>
+                                   <span className={`w-1.5 h-1.5 rounded-full mr-2 sm:mr-3 shrink-0 ${selectedPackage?.id === pkg.id ? 'bg-ubuxa-blue' : 'bg-slate-300 dark:bg-slate-600'}`}></span>
                                    {item}
                                  </p>
                                ))}
@@ -388,7 +410,7 @@ const Sales: React.FC = () => {
                   </div>
                 )}
 
-                {/* Step 3: Installation Logistics (NEW) */}
+                {/* Step 3: Installation Logistics */}
                 {wizardStep === 3 && (
                   <div className="space-y-6 sm:space-y-8 animate-in slide-in-from-right-4 duration-300">
                     <div className="text-center">
@@ -426,7 +448,7 @@ const Sales: React.FC = () => {
                   </div>
                 )}
 
-                {/* Step 4: Hardware Assignment (Shifted) */}
+                {/* Step 4: Hardware Assignment */}
                 {wizardStep === 4 && (
                   <div className="space-y-6 sm:space-y-8 animate-in slide-in-from-right-4 duration-300">
                     <div className="text-center">
@@ -456,7 +478,7 @@ const Sales: React.FC = () => {
                   </div>
                 )}
 
-                {/* Step 5: Digital Contract (NEW) */}
+                {/* Step 5: Digital Contract */}
                 {wizardStep === 5 && (
                   <div className="space-y-6 sm:space-y-8 animate-in slide-in-from-right-4 duration-300">
                     <div className="text-center">
@@ -488,7 +510,7 @@ const Sales: React.FC = () => {
                   </div>
                 )}
 
-                {/* Step 6: Final Valuation (Shifted) */}
+                {/* Step 6: Final Valuation */}
                 {wizardStep === 6 && (
                   <div className="space-y-6 sm:space-y-8 animate-in slide-in-from-right-4 duration-300">
                     <div className="bg-ubuxa-gradient p-8 sm:p-12 rounded-[2rem] sm:rounded-[3.5rem] text-white text-center shadow-2xl relative overflow-hidden">
@@ -538,7 +560,7 @@ const Sales: React.FC = () => {
         </div>
       </div>
 
-      {/* Sales Logs - Optimized List for mobile */}
+      {/* Sales Logs */}
       <div className="bg-white dark:bg-slate-900 rounded-[2rem] sm:rounded-[3.5rem] shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden">
         <div className="p-6 sm:p-10 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center space-x-3">
