@@ -1,12 +1,14 @@
 
 import React, { useState } from 'react';
-import { Smartphone, Lock, ChevronRight } from 'lucide-react';
+import { Smartphone, Lock, ChevronRight, Moon, Sun } from 'lucide-react';
+import { useTheme } from '../App';
 
 interface LoginProps {
   onLogin: () => void;
 }
 
 const Login: React.FC<LoginProps> = ({ onLogin }) => {
+  const { theme, toggleTheme } = useTheme();
   const [step, setStep] = useState<'phone' | 'otp'>('phone');
   const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState('');
@@ -33,7 +35,15 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 dark:bg-slate-950 flex items-center justify-center p-4 sm:p-6 font-sans transition-colors duration-500">
+    <div className="min-h-screen bg-slate-900 dark:bg-slate-950 flex items-center justify-center p-4 sm:p-6 font-sans transition-colors duration-500 relative">
+      <button 
+        onClick={toggleTheme}
+        className="absolute top-6 right-6 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition-all backdrop-blur-md z-10 border border-white/10"
+        title="Toggle Theme"
+      >
+        {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+      </button>
+
       <div className="max-w-md w-full bg-white dark:bg-slate-900 rounded-[2rem] sm:rounded-[3rem] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-500 border border-white/10 dark:border-slate-800">
         <div className="bg-ubuxa-gradient p-8 sm:p-14 text-center text-white relative">
           <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '20px 20px' }} />
