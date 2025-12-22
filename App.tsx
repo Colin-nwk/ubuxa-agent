@@ -15,7 +15,8 @@ import {
   Sun,
   Palette,
   BarChart3,
-  Smartphone
+  Smartphone,
+  Wallet
 } from 'lucide-react';
 import Dashboard from './components/Dashboard';
 import Customers from './components/Customers';
@@ -26,6 +27,7 @@ import SettingsView from './components/SettingsView';
 import Login from './components/Login';
 import ComponentGallery from './components/ComponentGallery';
 import Reports from './components/Reports';
+import Transactions from './components/Transactions';
 
 // Theme Context
 export const ThemeContext = createContext({
@@ -82,6 +84,7 @@ const App: React.FC = () => {
                <NavItem to="/" icon={<LayoutDashboard size={20} />} label="Dashboard" />
                <NavItem to="/customers" icon={<Users size={20} />} label="Customers" />
                <NavItem to="/sales" icon={<ShoppingCart size={20} />} label="Sales" />
+               <NavItem to="/transactions" icon={<Wallet size={20} />} label="Transactions" />
                <NavItem to="/inventory" icon={<Package size={20} />} label="Inventory" />
                <NavItem to="/devices" icon={<Smartphone size={20} />} label="Devices" />
                <NavItem to="/reports" icon={<BarChart3 size={20} />} label="Reports" />
@@ -129,6 +132,7 @@ const App: React.FC = () => {
                    <MobileNavItem to="/" icon={<LayoutDashboard size={24} />} label="Dashboard" onClick={() => setIsMobileMenuOpen(false)} />
                    <MobileNavItem to="/customers" icon={<Users size={24} />} label="Customers" onClick={() => setIsMobileMenuOpen(false)} />
                    <MobileNavItem to="/sales" icon={<ShoppingCart size={24} />} label="Sales" onClick={() => setIsMobileMenuOpen(false)} />
+                   <MobileNavItem to="/transactions" icon={<Wallet size={24} />} label="Transactions" onClick={() => setIsMobileMenuOpen(false)} />
                    <MobileNavItem to="/inventory" icon={<Package size={24} />} label="Inventory" onClick={() => setIsMobileMenuOpen(false)} />
                    <MobileNavItem to="/devices" icon={<Smartphone size={24} />} label="Devices" onClick={() => setIsMobileMenuOpen(false)} />
                    <MobileNavItem to="/reports" icon={<BarChart3 size={24} />} label="Reports" onClick={() => setIsMobileMenuOpen(false)} />
@@ -163,6 +167,7 @@ const App: React.FC = () => {
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/customers" element={<Customers />} />
                 <Route path="/sales" element={<Sales />} />
+                <Route path="/transactions" element={<Transactions />} />
                 <Route path="/inventory" element={<Inventory />} />
                 <Route path="/devices" element={<Devices />} />
                 <Route path="/reports" element={<Reports />} />
@@ -183,7 +188,7 @@ const App: React.FC = () => {
                     <ShoppingCart size={24} />
                  </Link>
               </div>
-              <BottomNavItem to="/devices" icon={<Smartphone size={20} />} label="Devices" />
+              <BottomNavItem to="/transactions" icon={<Wallet size={20} />} label="Wallet" />
               <BottomNavItem to="/settings" icon={<Settings size={20} />} label="More" />
             </div>
           </nav>
