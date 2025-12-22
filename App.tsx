@@ -14,12 +14,14 @@ import {
   Moon,
   Sun,
   Palette,
-  BarChart3
+  BarChart3,
+  Smartphone
 } from 'lucide-react';
 import Dashboard from './components/Dashboard';
 import Customers from './components/Customers';
 import Sales from './components/Sales';
 import Inventory from './components/Inventory';
+import Devices from './components/Devices';
 import SettingsView from './components/SettingsView';
 import Login from './components/Login';
 import ComponentGallery from './components/ComponentGallery';
@@ -81,6 +83,7 @@ const App: React.FC = () => {
                <NavItem to="/customers" icon={<Users size={20} />} label="Customers" />
                <NavItem to="/sales" icon={<ShoppingCart size={20} />} label="Sales" />
                <NavItem to="/inventory" icon={<Package size={20} />} label="Inventory" />
+               <NavItem to="/devices" icon={<Smartphone size={20} />} label="Devices" />
                <NavItem to="/reports" icon={<BarChart3 size={20} />} label="Reports" />
                <NavItem to="/gallery" icon={<Palette size={20} />} label="UI Gallery" />
                <NavItem to="/settings" icon={<Settings size={20} />} label="Settings" />
@@ -127,6 +130,7 @@ const App: React.FC = () => {
                    <MobileNavItem to="/customers" icon={<Users size={24} />} label="Customers" onClick={() => setIsMobileMenuOpen(false)} />
                    <MobileNavItem to="/sales" icon={<ShoppingCart size={24} />} label="Sales" onClick={() => setIsMobileMenuOpen(false)} />
                    <MobileNavItem to="/inventory" icon={<Package size={24} />} label="Inventory" onClick={() => setIsMobileMenuOpen(false)} />
+                   <MobileNavItem to="/devices" icon={<Smartphone size={24} />} label="Devices" onClick={() => setIsMobileMenuOpen(false)} />
                    <MobileNavItem to="/reports" icon={<BarChart3 size={24} />} label="Reports" onClick={() => setIsMobileMenuOpen(false)} />
                    <MobileNavItem to="/gallery" icon={<Palette size={24} />} label="UI Gallery" onClick={() => setIsMobileMenuOpen(false)} />
                    <MobileNavItem to="/settings" icon={<Settings size={24} />} label="Settings" onClick={() => setIsMobileMenuOpen(false)} />
@@ -160,6 +164,7 @@ const App: React.FC = () => {
                 <Route path="/customers" element={<Customers />} />
                 <Route path="/sales" element={<Sales />} />
                 <Route path="/inventory" element={<Inventory />} />
+                <Route path="/devices" element={<Devices />} />
                 <Route path="/reports" element={<Reports />} />
                 <Route path="/gallery" element={<ComponentGallery />} />
                 <Route path="/settings" element={<SettingsView />} />
@@ -178,7 +183,7 @@ const App: React.FC = () => {
                     <ShoppingCart size={24} />
                  </Link>
               </div>
-              <BottomNavItem to="/inventory" icon={<Package size={20} />} label="Stock" />
+              <BottomNavItem to="/devices" icon={<Smartphone size={20} />} label="Devices" />
               <BottomNavItem to="/settings" icon={<Settings size={20} />} label="More" />
             </div>
           </nav>
