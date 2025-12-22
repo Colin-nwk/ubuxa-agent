@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   User, 
@@ -361,6 +360,8 @@ const SettingsView: React.FC = () => {
   );
 };
 
+// Fix: Added <any> to React.ReactElement to resolve TypeScript error 'size' does not exist in type 'Partial<unknown> & Attributes'
+// and added React.isValidElement check for better safety
 const SettingItem: React.FC<{ icon: React.ReactNode, label: string, onClick?: () => void }> = ({ icon, label, onClick }) => (
   <button 
     onClick={onClick}
@@ -368,7 +369,7 @@ const SettingItem: React.FC<{ icon: React.ReactNode, label: string, onClick?: ()
   >
     <div className="flex items-center space-x-4">
       <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center group-hover:bg-slate-900 group-hover:text-gold transition-colors">
-        {React.cloneElement(icon as React.ReactElement, { size: 24 })}
+        {React.isValidElement(icon) ? React.cloneElement(icon as React.ReactElement<any>, { size: 24 }) : icon}
       </div>
       <span className="font-bold text-slate-900 text-sm">{label}</span>
     </div>

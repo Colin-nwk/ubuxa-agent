@@ -33,28 +33,29 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-white rounded-3xl shadow-2xl overflow-hidden">
-        <div className="bg-gold-gradient p-12 text-center text-slate-900">
-          <h1 className="text-4xl font-serif font-bold mb-2">UBUXA</h1>
-          <p className="text-sm font-medium uppercase tracking-widest opacity-80">Agent Portal</p>
+    <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4 sm:p-6 font-sans">
+      <div className="max-w-md w-full bg-white rounded-[2rem] sm:rounded-[3rem] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-500 border border-white/10">
+        <div className="bg-ubuxa-gradient p-8 sm:p-14 text-center text-white relative">
+          <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '20px 20px' }} />
+          <h1 className="text-4xl sm:text-5xl font-bold tracking-tighter italic uppercase mb-2 drop-shadow-lg">UBUXA</h1>
+          <p className="text-[9px] sm:text-[11px] font-black uppercase tracking-[0.3em] opacity-90">Secure Agent Access</p>
         </div>
         
-        <div className="p-8 lg:p-12">
+        <div className="p-6 sm:p-14 bg-white">
           {step === 'phone' ? (
-            <form onSubmit={handleRequestOtp} className="space-y-6">
-              <div className="text-center mb-8">
-                <h2 className="text-2xl font-bold text-slate-900">Welcome Back</h2>
-                <p className="text-slate-500 mt-2">Enter your phone number to continue</p>
+            <form onSubmit={handleRequestOtp} className="space-y-6 sm:space-y-8">
+              <div className="text-center mb-6 sm:mb-10">
+                <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">Identity Entry</h2>
+                <p className="text-sm sm:text-base text-slate-500 mt-2 font-medium">Log in to your agent workstation</p>
               </div>
               
-              <div className="relative">
-                <Smartphone className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+              <div className="relative group">
+                <Smartphone className="absolute left-4 sm:left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-ubuxa-blue transition-colors" size={20} sm={22} />
                 <input 
                   type="tel" 
                   required
                   placeholder="Phone Number" 
-                  className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
+                  className="w-full pl-12 sm:pl-14 pr-6 py-3 sm:py-4 bg-slate-50 border border-slate-200 rounded-xl sm:rounded-[1.25rem] text-sm sm:text-base text-slate-900 font-bold focus:ring-2 focus:ring-ubuxa-blue focus:outline-none transition-all shadow-sm group-hover:border-ubuxa-blue"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                 />
@@ -63,26 +64,26 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
               <button 
                 type="submit" 
                 disabled={loading}
-                className="w-full bg-slate-900 text-white py-4 rounded-2xl font-bold flex items-center justify-center space-x-2 hover:bg-slate-800 transition-colors disabled:opacity-50"
+                className="w-full bg-slate-900 text-white py-4 sm:py-5 rounded-xl sm:rounded-[1.25rem] font-bold flex items-center justify-center space-x-3 hover:bg-slate-800 transition-all shadow-xl disabled:opacity-50 active:scale-95"
               >
-                {loading ? "Sending..." : "Request OTP"}
+                <span className="text-base sm:text-lg">{loading ? "Synchronizing..." : "Request Token"}</span>
                 {!loading && <ChevronRight size={20} />}
               </button>
             </form>
           ) : (
-            <form onSubmit={handleVerifyOtp} className="space-y-6">
-              <div className="text-center mb-8">
-                <h2 className="text-2xl font-bold text-slate-900">Verify Code</h2>
-                <p className="text-slate-500 mt-2">Enter the 6-digit code sent to {phone}</p>
+            <form onSubmit={handleVerifyOtp} className="space-y-6 sm:space-y-8">
+              <div className="text-center mb-6 sm:mb-10">
+                <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">Verify Protocol</h2>
+                <p className="text-sm sm:text-base text-slate-500 mt-2 font-medium">Code sent to <span className="text-slate-900 font-bold">{phone}</span></p>
               </div>
               
-              <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+              <div className="relative group">
+                <Lock className="absolute left-4 sm:left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-ubuxa-blue transition-colors" size={20} sm={22} />
                 <input 
                   type="text" 
                   required
-                  placeholder="Enter OTP" 
-                  className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all tracking-[0.5em] text-center text-xl font-bold"
+                  placeholder="000000" 
+                  className="w-full pl-12 sm:pl-14 pr-6 py-3 sm:py-4 bg-slate-50 border border-slate-200 rounded-xl sm:rounded-[1.25rem] text-slate-900 focus:ring-2 focus:ring-ubuxa-blue focus:outline-none transition-all tracking-[0.4em] sm:tracking-[0.6em] text-center text-xl sm:text-2xl font-black placeholder:tracking-normal placeholder:font-medium placeholder:text-slate-300 shadow-sm group-hover:border-ubuxa-blue"
                   value={otp}
                   maxLength={6}
                   onChange={(e) => setOtp(e.target.value)}
@@ -92,21 +93,24 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
               <button 
                 type="submit" 
                 disabled={loading}
-                className="w-full bg-gold-gradient text-slate-900 py-4 rounded-2xl font-bold hover:opacity-90 transition-all disabled:opacity-50"
+                className="w-full bg-ubuxa-gradient text-white py-4 sm:py-5 rounded-xl sm:rounded-[1.25rem] font-bold text-base sm:text-lg hover:shadow-2xl hover:shadow-ubuxa-blue/20 transition-all disabled:opacity-50 active:scale-95 shadow-xl"
               >
-                {loading ? "Verifying..." : "Sign In"}
+                {loading ? "Authenticating..." : "Authorize Login"}
               </button>
               
               <button 
                 type="button" 
                 onClick={() => setStep('phone')}
-                className="w-full text-slate-500 text-sm font-medium hover:text-slate-900"
+                className="w-full text-slate-400 text-[10px] sm:text-xs font-black uppercase tracking-widest hover:text-ubuxa-blue transition-colors"
               >
-                Change Phone Number
+                Cancel and Restart
               </button>
             </form>
           )}
         </div>
+      </div>
+      <div className="absolute bottom-6 sm:bottom-10 text-slate-600 text-[8px] sm:text-[10px] font-black uppercase tracking-[0.2em] opacity-40 text-center px-4">
+        UBUXA Corporate Ecosystem • Secure Deployment
       </div>
     </div>
   );
