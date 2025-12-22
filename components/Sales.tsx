@@ -22,9 +22,14 @@ import {
   FileText,
   Calendar,
   MapPin,
-  PenTool
+  PenTool,
+  FilePlus,
+  Shield,
+  Users,
+  Truck,
+  CreditCard
 } from 'lucide-react';
-import { BottomSheetModal, PrimaryButton, SecondaryButton, Input, SignaturePad } from './Shared';
+import { BottomSheetModal, PrimaryButton, SecondaryButton, Input, SignaturePad, Select, FileUpload } from './Shared';
 import { getAllFromStore, addItemToStore, addToSyncQueue } from '../utils/db';
 
 const ITEMS_PER_PAGE = 5;
@@ -37,6 +42,7 @@ const Sales: React.FC = () => {
   const [dbDevices, setDbDevices] = useState<any[]>([]);
   const [dbSales, setDbSales] = useState<any[]>([]);
 
+  // ---- Existing Wizard State ----
   const [showDrawer, setShowDrawer] = useState(false);
   const [wizardStep, setWizardStep] = useState(1);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -44,15 +50,12 @@ const Sales: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedSaleDetails, setSelectedSaleDetails] = useState<any>(null);
   
-  // Wizard Selection State
   const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
   const [cart, setCart] = useState<any[]>([]);
   const [selectedPackage, setSelectedPackage] = useState<any>(null);
   const [assignedDevices, setAssignedDevices] = useState<string[]>([]);
   const [paymentPlan, setPaymentPlan] = useState('OUTRIGHT');
   const [selectionMode, setSelectionMode] = useState<'PACKAGE' | 'ITEMS'>('PACKAGE');
-  
-  // New States for Extended Flow
   const [installAddress, setInstallAddress] = useState('');
   const [installDate, setInstallDate] = useState('');
   const [signature, setSignature] = useState<string | null>(null);
@@ -63,29 +66,51 @@ const Sales: React.FC = () => {
   const [invSearch, setInvSearch] = useState('');
   const [devSearch, setDevSearch] = useState('');
 
+  // ---- New Sales Request State ----
+  const [showRequestSheet, setShowRequestSheet] = useState(false);
+  const [requestStep, setRequestStep] = useState(1);
+  const [reqData, setReqData] = useState({
+    firstName: '', lastName: '', phone: '', email: '', address: '',
+    packageId: '', packageName: '', packagePrice: 0,
+    paymentType: 'FINANCED', downPayment: '', tenor: '12',
+    idType: 'NIN', idNumber: '', idImage: null as any,
+    guarantorName: '', guarantorPhone: '', guarantorRel: 'Family',
+    deviceSns: [] as string[],
+    nokName: '', nokPhone: '',
+    installFee: '', accessoriesCost: '',
+  });
+
   // Fetch Data on Mount
   useEffect(() => {
     const fetchData = async () => {
         try {
-            const [c, i, p, d, s] = await Promise.all([
+            const [c, i, p, d, s, reqs] = await Promise.all([
                 getAllFromStore('customers'),
                 getAllFromStore('inventory'),
                 getAllFromStore('packages'),
                 getAllFromStore('devices'),
-                getAllFromStore('sales')
+                getAllFromStore('sales'),
+                getAllFromStore('sales_requests')
             ]);
+            // Combine sales and requests for display, marking requests clearly
+            const allTransactions = [
+                ...s, 
+                ...reqs.map((r: any) => ({ ...r, status: 'REQUEST', product: r.packageName, amount: r.packagePrice, customer: `${r.firstName} ${r.lastName}` }))
+            ];
+            
             setDbCustomers(c);
             setDbInventory(i);
             setDbPackages(p);
             setDbDevices(d);
-            setDbSales(s.sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime()));
+            setDbSales(allTransactions.sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime()));
         } catch (e) {
             console.error("Failed to load DB data", e);
         }
     };
     fetchData();
-  }, [isSuccess]); // Refresh after successful sale
+  }, [isSuccess]); 
 
+  // --- Reset Functions ---
   const resetWizard = () => {
     setShowDrawer(false);
     setWizardStep(1);
@@ -99,12 +124,24 @@ const Sales: React.FC = () => {
     setInstallAddress('');
     setInstallDate('');
     setSignature(null);
-    setCustSearch('');
-    setPkgSearch('');
-    setInvSearch('');
-    setDevSearch('');
   };
 
+  const resetRequestFlow = () => {
+      setShowRequestSheet(false);
+      setRequestStep(1);
+      setReqData({
+        firstName: '', lastName: '', phone: '', email: '', address: '',
+        packageId: '', packageName: '', packagePrice: 0,
+        paymentType: 'FINANCED', downPayment: '', tenor: '12',
+        idType: 'NIN', idNumber: '', idImage: null,
+        guarantorName: '', guarantorPhone: '', guarantorRel: 'Family',
+        deviceSns: [],
+        nokName: '', nokPhone: '',
+        installFee: '', accessoriesCost: '',
+      });
+  };
+
+  // --- Actions ---
   const completeSale = async () => {
     const newSale = {
         id: `SL-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`,
@@ -120,20 +157,27 @@ const Sales: React.FC = () => {
         installDate,
         signature
     };
-
-    // Save to local DB
     await addItemToStore('sales', newSale);
-
-    // If offline, add to sync queue
-    if (!navigator.onLine) {
-        await addToSyncQueue({ type: 'CREATE_SALE', payload: newSale });
-    }
-
-    setTimeout(() => {
-      setIsSuccess(true);
-    }, 800);
+    if (!navigator.onLine) await addToSyncQueue({ type: 'CREATE_SALE', payload: newSale });
+    setTimeout(() => setIsSuccess(true), 800);
   };
 
+  const completeRequest = async () => {
+      const newRequest = {
+          id: `REQ-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`,
+          ...reqData,
+          date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+          status: 'PENDING_APPROVAL'
+      };
+      
+      await addItemToStore('sales_requests', newRequest);
+      if (!navigator.onLine) await addToSyncQueue({ type: 'CREATE_REQUEST', payload: newRequest });
+      
+      resetRequestFlow();
+      setIsSuccess(true); // Reuse success state/UI or create a specific toast
+  };
+
+  // --- Calculations ---
   const totalPrice = useMemo(() => {
     if (selectionMode === 'PACKAGE' && selectedPackage) return selectedPackage.price;
     if (selectionMode === 'ITEMS') return cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
@@ -144,11 +188,8 @@ const Sales: React.FC = () => {
     const existing = cart.find(c => c.id === item.id);
     if (existing) {
       const newQty = existing.quantity + delta;
-      if (newQty <= 0) {
-        setCart(cart.filter(c => c.id !== item.id));
-      } else {
-        setCart(cart.map(c => c.id === item.id ? { ...c, quantity: newQty } : c));
-      }
+      if (newQty <= 0) setCart(cart.filter(c => c.id !== item.id));
+      else setCart(cart.map(c => c.id === item.id ? { ...c, quantity: newQty } : c));
     } else if (delta > 0) {
       setCart([...cart, { ...item, quantity: 1 }]);
     }
@@ -160,56 +201,29 @@ const Sales: React.FC = () => {
     return false;
   }, [cart, selectedPackage, selectionMode]);
 
-  const filteredCustomers = useMemo(() => 
-    dbCustomers.filter(c => c.name.toLowerCase().includes(custSearch.toLowerCase()) || c.phone.includes(custSearch)),
-  [dbCustomers, custSearch]);
-
-  const filteredPackages = useMemo(() => 
-    dbPackages.filter(p => p.name.toLowerCase().includes(pkgSearch.toLowerCase())),
-  [dbPackages, pkgSearch]);
-
-  const filteredInventory = useMemo(() => 
-    dbInventory.filter(i => i.name.toLowerCase().includes(invSearch.toLowerCase())),
-  [dbInventory, invSearch]);
-
-  const filteredDevices = useMemo(() => 
-    dbDevices.filter(d => d.sn.toLowerCase().includes(devSearch.toLowerCase()) || d.model.toLowerCase().includes(devSearch.toLowerCase())),
-  [dbDevices, devSearch]);
-
-  const filteredSales = useMemo(() => 
-    dbSales.filter(s => 
-      s.customer.toLowerCase().includes(listSearchQuery.toLowerCase()) || 
-      s.product.toLowerCase().includes(listSearchQuery.toLowerCase()) ||
-      s.id.toLowerCase().includes(listSearchQuery.toLowerCase())
-    ),
-  [dbSales, listSearchQuery]);
-
+  // --- Filtering ---
+  const filteredCustomers = useMemo(() => dbCustomers.filter(c => c.name.toLowerCase().includes(custSearch.toLowerCase()) || c.phone.includes(custSearch)), [dbCustomers, custSearch]);
+  const filteredPackages = useMemo(() => dbPackages.filter(p => p.name.toLowerCase().includes(pkgSearch.toLowerCase())), [dbPackages, pkgSearch]);
+  const filteredInventory = useMemo(() => dbInventory.filter(i => i.name.toLowerCase().includes(invSearch.toLowerCase())), [dbInventory, invSearch]);
+  const filteredDevices = useMemo(() => dbDevices.filter(d => d.sn.toLowerCase().includes(devSearch.toLowerCase()) || d.model.toLowerCase().includes(devSearch.toLowerCase())), [dbDevices, devSearch]);
+  const filteredSales = useMemo(() => dbSales.filter(s => s.customer?.toLowerCase().includes(listSearchQuery.toLowerCase()) || s.product?.toLowerCase().includes(listSearchQuery.toLowerCase()) || s.id.toLowerCase().includes(listSearchQuery.toLowerCase())), [dbSales, listSearchQuery]);
   const totalPages = Math.ceil(filteredSales.length / ITEMS_PER_PAGE);
 
-  // Flow Navigation Logic
+  // --- Wizard Navigation ---
   const handleNext = () => {
-    if (wizardStep === 1 && selectedCustomer) {
-        setInstallAddress(selectedCustomer.address || ''); 
-        setWizardStep(2);
-    } 
-    else if (wizardStep === 2) setWizardStep(3); // To Logistics
-    else if (wizardStep === 3) setWizardStep(needsDevices ? 4 : 5); // Skip HW if not needed
-    else if (wizardStep === 4) setWizardStep(5); // To Contract
-    else if (wizardStep === 5) setWizardStep(6); // To Final
+    if (wizardStep === 1 && selectedCustomer) { setInstallAddress(selectedCustomer.address || ''); setWizardStep(2); } 
+    else if (wizardStep === 2) setWizardStep(3);
+    else if (wizardStep === 3) setWizardStep(needsDevices ? 4 : 5);
+    else if (wizardStep === 4) setWizardStep(5);
+    else if (wizardStep === 5) setWizardStep(6);
     else completeSale();
   };
-
-  const handleBack = () => {
-      if (wizardStep === 5 && !needsDevices) setWizardStep(3);
-      else setWizardStep(prev => prev - 1);
-  };
-
-  // Step Validation
+  const handleBack = () => { if (wizardStep === 5 && !needsDevices) setWizardStep(3); else setWizardStep(prev => prev - 1); };
   const isStepValid = () => {
       if (wizardStep === 1) return !!selectedCustomer;
       if (wizardStep === 2) return cart.length > 0 || !!selectedPackage;
       if (wizardStep === 3) return installAddress.length > 3 && !!installDate;
-      if (wizardStep === 4) return true; // Optional generally, or validated by logic
+      if (wizardStep === 4) return true;
       if (wizardStep === 5) return !!signature;
       return true;
   };
@@ -221,13 +235,22 @@ const Sales: React.FC = () => {
           <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Sales Records</h2>
           <p className="text-slate-500 dark:text-slate-400 font-medium text-xs sm:text-sm mt-1">Audit transactions and initialize new deployments</p>
         </div>
-        <button 
-          onClick={() => setShowDrawer(true)}
-          className="bg-ubuxa-gradient text-white px-6 sm:px-8 py-3 sm:py-4 rounded-xl sm:rounded-2xl font-bold flex items-center justify-center space-x-2 sm:space-x-3 shadow-xl shadow-ubuxa-blue/20 hover:scale-[1.02] transition-all active:scale-95 text-sm sm:text-base"
-        >
-          <Plus size={20} strokeWidth={3} />
-          <span>New Sale</span>
-        </button>
+        <div className="flex space-x-3">
+            <SecondaryButton 
+                onClick={() => setShowRequestSheet(true)}
+                className="shadow-lg shadow-slate-200 dark:shadow-slate-900/50"
+                icon={<FilePlus size={18} />}
+            >
+                Create Request
+            </SecondaryButton>
+            <button 
+            onClick={() => setShowDrawer(true)}
+            className="bg-ubuxa-gradient text-white px-6 sm:px-8 py-3 sm:py-4 rounded-xl sm:rounded-2xl font-bold flex items-center justify-center space-x-2 sm:space-x-3 shadow-xl shadow-ubuxa-blue/20 hover:scale-[1.02] transition-all active:scale-95 text-sm sm:text-base"
+            >
+            <Plus size={20} strokeWidth={3} />
+            <span>New Sale</span>
+            </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-8">
@@ -255,7 +278,174 @@ const Sales: React.FC = () => {
         </div>
       </div>
 
-      {/* Sales Wizard Side Drawer */}
+      {/* --- Sales Request Bottom Sheet (Multi-Step) --- */}
+      <BottomSheetModal
+        isOpen={showRequestSheet}
+        onClose={resetRequestFlow}
+        title="Create Sales Request"
+      >
+        <div className="space-y-6 pb-20">
+            {/* Progress Bar */}
+            <div className="flex items-center space-x-2 mb-4">
+                {[...Array(9)].map((_, i) => (
+                    <div key={i} className={`h-1 flex-1 rounded-full ${i + 1 <= requestStep ? 'bg-ubuxa-blue' : 'bg-slate-200 dark:bg-slate-700'}`} />
+                ))}
+            </div>
+
+            {requestStep === 1 && (
+                <div className="space-y-4 animate-in slide-in-from-right-4">
+                    <h4 className="font-bold text-lg text-slate-900 dark:text-white">Customer Registration</h4>
+                    <div className="grid grid-cols-2 gap-4">
+                        <Input label="First Name" value={reqData.firstName} onChange={e => setReqData({...reqData, firstName: e.target.value})} placeholder="Jane" />
+                        <Input label="Last Name" value={reqData.lastName} onChange={e => setReqData({...reqData, lastName: e.target.value})} placeholder="Doe" />
+                    </div>
+                    <Input label="Phone Number" value={reqData.phone} onChange={e => setReqData({...reqData, phone: e.target.value})} placeholder="+234..." type="tel" icon={<Smartphone size={18} />} />
+                    <Input label="Email (Optional)" value={reqData.email} onChange={e => setReqData({...reqData, email: e.target.value})} placeholder="email@example.com" type="email" />
+                    <Input label="Address" value={reqData.address} onChange={e => setReqData({...reqData, address: e.target.value})} icon={<MapPin size={18} />} />
+                </div>
+            )}
+
+            {requestStep === 2 && (
+                <div className="space-y-4 animate-in slide-in-from-right-4">
+                    <h4 className="font-bold text-lg text-slate-900 dark:text-white">Package Selection</h4>
+                    <div className="relative group mb-4">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                        <input type="text" placeholder="Search packages..." className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm" onChange={(e) => setPkgSearch(e.target.value)} />
+                    </div>
+                    <div className="space-y-3">
+                        {filteredPackages.map(pkg => (
+                            <div key={pkg.id} onClick={() => setReqData({...reqData, packageId: pkg.id, packageName: pkg.name, packagePrice: pkg.price})} 
+                                className={`p-4 rounded-2xl border-2 cursor-pointer transition-all ${reqData.packageId === pkg.id ? 'border-ubuxa-blue bg-blue-50 dark:bg-blue-900/30' : 'border-slate-100 dark:border-slate-800'}`}>
+                                <div className="flex justify-between">
+                                    <span className="font-bold text-slate-900 dark:text-white">{pkg.name}</span>
+                                    <span className="font-bold text-ubuxa-blue">₦{pkg.price.toLocaleString()}</span>
+                                </div>
+                                <p className="text-xs text-slate-500 mt-1">{pkg.items.slice(0, 3).join(', ')}</p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {requestStep === 3 && (
+                <div className="space-y-4 animate-in slide-in-from-right-4">
+                    <h4 className="font-bold text-lg text-slate-900 dark:text-white">Parameters</h4>
+                    <Select label="Payment Plan" value={reqData.paymentType} onChange={e => setReqData({...reqData, paymentType: e.target.value})}>
+                        <option value="OUTRIGHT">Outright Purchase</option>
+                        <option value="FINANCED">Financed (Installments)</option>
+                    </Select>
+                    {reqData.paymentType === 'FINANCED' && (
+                        <>
+                            <Input label="Down Payment (₦)" type="number" value={reqData.downPayment} onChange={e => setReqData({...reqData, downPayment: e.target.value})} icon={<CreditCard size={18} />} />
+                            <Select label="Repayment Tenor" value={reqData.tenor} onChange={e => setReqData({...reqData, tenor: e.target.value})}>
+                                <option value="3">3 Months</option>
+                                <option value="6">6 Months</option>
+                                <option value="12">12 Months</option>
+                                <option value="24">24 Months</option>
+                            </Select>
+                        </>
+                    )}
+                </div>
+            )}
+
+            {requestStep === 4 && (
+                <div className="space-y-4 animate-in slide-in-from-right-4">
+                    <h4 className="font-bold text-lg text-slate-900 dark:text-white">Customer Identification</h4>
+                    <Select label="ID Type" value={reqData.idType} onChange={e => setReqData({...reqData, idType: e.target.value})}>
+                        <option value="NIN">National Identity Number (NIN)</option>
+                        <option value="VOTERS">Voter's Card</option>
+                        <option value="DL">Driver's License</option>
+                        <option value="PASSPORT">International Passport</option>
+                    </Select>
+                    <Input label="ID Number" value={reqData.idNumber} onChange={e => setReqData({...reqData, idNumber: e.target.value})} icon={<Hash size={18} />} />
+                    <FileUpload label="Upload ID Image" onChange={(f) => setReqData({...reqData, idImage: f})} />
+                </div>
+            )}
+
+            {requestStep === 5 && (
+                <div className="space-y-4 animate-in slide-in-from-right-4">
+                    <h4 className="font-bold text-lg text-slate-900 dark:text-white">Guarantor Information</h4>
+                    <Input label="Guarantor Name" value={reqData.guarantorName} onChange={e => setReqData({...reqData, guarantorName: e.target.value})} icon={<User size={18} />} />
+                    <Input label="Guarantor Phone" value={reqData.guarantorPhone} onChange={e => setReqData({...reqData, guarantorPhone: e.target.value})} type="tel" icon={<Smartphone size={18} />} />
+                    <Select label="Relationship" value={reqData.guarantorRel} onChange={e => setReqData({...reqData, guarantorRel: e.target.value})}>
+                        <option value="Family">Family Member</option>
+                        <option value="Colleague">Colleague</option>
+                        <option value="Friend">Friend</option>
+                        <option value="Community_Leader">Community Leader</option>
+                    </Select>
+                </div>
+            )}
+
+            {requestStep === 6 && (
+                <div className="space-y-4 animate-in slide-in-from-right-4">
+                    <h4 className="font-bold text-lg text-slate-900 dark:text-white">Link Devices (Optional)</h4>
+                    <div className="relative group mb-4">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                        <input type="text" placeholder="Scan or search serial..." className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm" onChange={(e) => setDevSearch(e.target.value)} />
+                    </div>
+                    <div className="space-y-2 max-h-60 overflow-y-auto">
+                        {filteredDevices.map(dev => (
+                            <div key={dev.sn} onClick={() => {
+                                const newSns = reqData.deviceSns.includes(dev.sn) ? reqData.deviceSns.filter(s => s !== dev.sn) : [...reqData.deviceSns, dev.sn];
+                                setReqData({...reqData, deviceSns: newSns});
+                            }} className={`flex items-center justify-between p-3 rounded-xl border-2 cursor-pointer ${reqData.deviceSns.includes(dev.sn) ? 'border-ubuxa-blue bg-blue-50 dark:bg-blue-900/20' : 'border-slate-100 dark:border-slate-800'}`}>
+                                <span className="font-mono text-sm font-bold text-slate-700 dark:text-slate-300">{dev.sn}</span>
+                                {reqData.deviceSns.includes(dev.sn) && <CheckCircle2 size={16} className="text-ubuxa-blue" />}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {requestStep === 7 && (
+                <div className="space-y-4 animate-in slide-in-from-right-4">
+                    <h4 className="font-bold text-lg text-slate-900 dark:text-white">Next of Kin (Optional)</h4>
+                    <Input label="Name" value={reqData.nokName} onChange={e => setReqData({...reqData, nokName: e.target.value})} icon={<User size={18} />} />
+                    <Input label="Phone" value={reqData.nokPhone} onChange={e => setReqData({...reqData, nokPhone: e.target.value})} type="tel" icon={<Smartphone size={18} />} />
+                </div>
+            )}
+
+            {requestStep === 8 && (
+                <div className="space-y-4 animate-in slide-in-from-right-4">
+                    <h4 className="font-bold text-lg text-slate-900 dark:text-white">Miscellaneous Costs (Optional)</h4>
+                    <Input label="Installation Fee (₦)" type="number" value={reqData.installFee} onChange={e => setReqData({...reqData, installFee: e.target.value})} icon={<Truck size={18} />} />
+                    <Input label="Accessories Cost (₦)" type="number" value={reqData.accessoriesCost} onChange={e => setReqData({...reqData, accessoriesCost: e.target.value})} icon={<Package size={18} />} />
+                </div>
+            )}
+
+            {requestStep === 9 && (
+                <div className="space-y-6 animate-in slide-in-from-right-4">
+                    <h4 className="font-bold text-lg text-slate-900 dark:text-white">Preview Request</h4>
+                    <div className="bg-slate-50 dark:bg-slate-800 p-6 rounded-2xl space-y-3 text-sm border border-slate-200 dark:border-slate-700">
+                        <div className="flex justify-between"><span className="text-slate-500">Customer</span><span className="font-bold">{reqData.firstName} {reqData.lastName}</span></div>
+                        <div className="flex justify-between"><span className="text-slate-500">Package</span><span className="font-bold">{reqData.packageName}</span></div>
+                        <div className="flex justify-between"><span className="text-slate-500">Plan</span><span className="font-bold">{reqData.paymentType}</span></div>
+                        <div className="flex justify-between"><span className="text-slate-500">Total Value</span><span className="font-bold text-ubuxa-blue">₦{(reqData.packagePrice + Number(reqData.installFee) + Number(reqData.accessoriesCost)).toLocaleString()}</span></div>
+                        <div className="border-t border-slate-200 dark:border-slate-700 pt-2 mt-2">
+                             <div className="flex justify-between"><span className="text-slate-500">Guarantor</span><span className="font-bold">{reqData.guarantorName}</span></div>
+                             <div className="flex justify-between"><span className="text-slate-500">Devices</span><span className="font-bold">{reqData.deviceSns.length} linked</span></div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Navigation Buttons */}
+            <div className="flex gap-3 pt-4">
+                {requestStep > 1 && <SecondaryButton onClick={() => setRequestStep(p => p - 1)} className="flex-1">Back</SecondaryButton>}
+                <PrimaryButton 
+                    onClick={() => {
+                        if (requestStep < 9) setRequestStep(p => p + 1);
+                        else completeRequest();
+                    }} 
+                    className="flex-1"
+                >
+                    {requestStep === 9 ? 'Submit Request' : 'Next'}
+                </PrimaryButton>
+            </div>
+        </div>
+      </BottomSheetModal>
+
+      {/* --- Existing Sales Wizard Side Drawer --- */}
       <div className={`fixed inset-0 z-[100] transition-visibility duration-300 ${showDrawer ? 'visible' : 'invisible'}`}>
         <div className={`absolute inset-0 bg-slate-900/70 backdrop-blur-md transition-opacity duration-300 ${showDrawer ? 'opacity-100' : 'opacity-0'}`} onClick={resetWizard}/>
         <div className={`absolute top-0 right-0 h-full w-full max-w-lg bg-white dark:bg-slate-900 shadow-2xl transition-transform duration-500 transform flex flex-col ${showDrawer ? 'translate-x-0' : 'translate-x-full'}`}>
@@ -289,14 +479,13 @@ const Sales: React.FC = () => {
               <div className="flex flex-col items-center justify-center h-full text-center space-y-6 sm:space-y-8 animate-in zoom-in-95 duration-500">
                 <div className="w-20 h-20 sm:w-28 sm:h-28 bg-blue-50 dark:bg-blue-900/30 text-ubuxa-blue rounded-3xl flex items-center justify-center shadow-xl shadow-blue-100 dark:shadow-blue-900/20"><CheckCircle2 size={40} /></div>
                 <div>
-                   <h4 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Deployment Logged</h4>
+                   <h4 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Success</h4>
                    <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400 font-medium mt-2 sm:mt-3 px-4">
                      {navigator.onLine ? 'Transaction validated and archived successfully.' : 'Transaction saved offline. It will sync when connection restores.'}
                    </p>
                 </div>
                 <div className="w-full space-y-3 sm:space-y-4 pt-6 sm:pt-10">
-                   <button className="w-full bg-slate-900 dark:bg-slate-800 text-white py-4 sm:py-5 rounded-xl sm:rounded-2xl font-bold text-base sm:text-lg shadow-xl active:scale-95 transition-all">Print Receipt</button>
-                   <button onClick={resetWizard} className="w-full bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-300 py-4 sm:py-5 rounded-xl sm:rounded-2xl font-bold text-base sm:text-lg active:scale-95 transition-all">Close Auditor</button>
+                   <button onClick={resetWizard} className="w-full bg-slate-900 dark:bg-slate-800 text-white py-4 sm:py-5 rounded-xl sm:rounded-2xl font-bold text-base sm:text-lg shadow-xl active:scale-95 transition-all">Done</button>
                 </div>
               </div>
             ) : (
@@ -582,7 +771,13 @@ const Sales: React.FC = () => {
           {filteredSales.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE).map((sale) => (
             <div key={sale.id} onClick={() => setSelectedSaleDetails(sale)} className="p-5 sm:p-8 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800 transition-all cursor-pointer group active:bg-slate-100 dark:active:bg-slate-800">
               <div className="flex items-center space-x-4 sm:space-x-8 min-w-0">
-                <div className={`w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl flex items-center justify-center transition-all shadow-sm shrink-0 ${sale.status === 'COMPLETED' ? 'bg-blue-50 dark:bg-blue-900/30 text-ubuxa-blue' : 'bg-slate-100 dark:bg-slate-800 text-slate-400'}`}><ShoppingCart size={20} /></div>
+                <div className={`w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl flex items-center justify-center transition-all shadow-sm shrink-0 ${
+                    sale.status === 'COMPLETED' ? 'bg-blue-50 dark:bg-blue-900/30 text-ubuxa-blue' : 
+                    sale.status === 'REQUEST' ? 'bg-purple-50 dark:bg-purple-900/30 text-purple-600' :
+                    'bg-slate-100 dark:bg-slate-800 text-slate-400'
+                }`}>
+                    {sale.status === 'REQUEST' ? <FileText size={20} /> : <ShoppingCart size={20} />}
+                </div>
                 <div className="min-w-0">
                    <h4 className="font-bold text-slate-900 dark:text-white text-sm sm:text-lg group-hover:text-ubuxa-blue transition-colors tracking-tight truncate">{sale.customer}</h4>
                    <p className="text-[9px] sm:text-[10px] text-slate-400 font-black uppercase tracking-widest mt-1 truncate">{sale.product} • <span className="text-slate-500">{sale.id}</span></p>
@@ -612,19 +807,27 @@ const Sales: React.FC = () => {
       <BottomSheetModal
         isOpen={!!selectedSaleDetails}
         onClose={() => setSelectedSaleDetails(null)}
-        title="Transaction Details"
+        title={selectedSaleDetails?.status === 'REQUEST' ? 'Request Details' : 'Transaction Details'}
       >
         {selectedSaleDetails && (
           <div className="space-y-6">
              {/* Status & Amount Header */}
-             <div className={`p-6 rounded-2xl flex items-center justify-between ${selectedSaleDetails.status === 'COMPLETED' ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400' : 'bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400'}`}>
+             <div className={`p-6 rounded-2xl flex items-center justify-between ${
+                 selectedSaleDetails.status === 'COMPLETED' ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400' : 
+                 selectedSaleDetails.status === 'REQUEST' ? 'bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400' :
+                 'bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400'
+             }`}>
                 <div className="flex items-center space-x-3">
-                   <div className={`p-2 rounded-full ${selectedSaleDetails.status === 'COMPLETED' ? 'bg-green-200 dark:bg-green-800' : 'bg-amber-200 dark:bg-amber-800'}`}>
-                      {selectedSaleDetails.status === 'COMPLETED' ? <CheckCircle2 size={20} /> : <Clock size={20} />} 
+                   <div className={`p-2 rounded-full ${
+                       selectedSaleDetails.status === 'COMPLETED' ? 'bg-green-200 dark:bg-green-800' : 
+                       selectedSaleDetails.status === 'REQUEST' ? 'bg-purple-200 dark:bg-purple-800' :
+                       'bg-amber-200 dark:bg-amber-800'
+                   }`}>
+                      {selectedSaleDetails.status === 'COMPLETED' ? <CheckCircle2 size={20} /> : selectedSaleDetails.status === 'REQUEST' ? <FileText size={20} /> : <Clock size={20} />} 
                    </div>
                    <div>
                       <p className="font-bold text-sm">Status</p>
-                      <p className="text-xs font-black uppercase tracking-widest">{selectedSaleDetails.status}</p>
+                      <p className="text-xs font-black uppercase tracking-widest">{selectedSaleDetails.status === 'REQUEST' ? 'PENDING APPROVAL' : selectedSaleDetails.status}</p>
                    </div>
                 </div>
                 <div className="text-right">
@@ -661,17 +864,23 @@ const Sales: React.FC = () => {
                    </div>
                    <div className="flex justify-between">
                       <span className="text-sm text-slate-600 dark:text-slate-400">Payment Plan</span>
-                      <span className="text-sm font-bold text-slate-900 dark:text-white">{selectedSaleDetails.paymentPlan}</span>
+                      <span className="text-sm font-bold text-slate-900 dark:text-white">{selectedSaleDetails.paymentType || selectedSaleDetails.paymentPlan}</span>
                    </div>
+                   {selectedSaleDetails.status === 'REQUEST' && (
+                       <div className="flex justify-between">
+                            <span className="text-sm text-slate-600 dark:text-slate-400">Guarantor</span>
+                            <span className="text-sm font-bold text-slate-900 dark:text-white">{selectedSaleDetails.guarantorName}</span>
+                       </div>
+                   )}
                 </div>
              </div>
 
-             {/* Associated Devices */}
-             {selectedSaleDetails.devices && selectedSaleDetails.devices.length > 0 && (
+             {/* Associated Devices (Handling both arrays for different structures) */}
+             {(selectedSaleDetails.devices || selectedSaleDetails.deviceSns) && (selectedSaleDetails.devices?.length > 0 || selectedSaleDetails.deviceSns?.length > 0) && (
                <div className="space-y-3">
                   <p className="text-xs text-slate-400 font-bold uppercase tracking-widest pl-2">Linked Hardware</p>
                   <div className="space-y-2">
-                     {selectedSaleDetails.devices.map((sn: string) => (
+                     {(selectedSaleDetails.devices || selectedSaleDetails.deviceSns).map((sn: string) => (
                         <div key={sn} className="flex items-center space-x-3 p-3 border border-slate-100 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900">
                            <Smartphone size={16} className="text-slate-400" />
                            <span className="text-sm font-mono font-bold text-slate-700 dark:text-slate-300">{sn}</span>

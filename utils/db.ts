@@ -1,12 +1,13 @@
 
 export const DB_NAME = 'ubuxa_db';
-export const DB_VERSION = 1;
+export const DB_VERSION = 2; // Incremented version for schema change
 
 const STORES = {
   CUSTOMERS: 'customers',
   INVENTORY: 'inventory',
   PACKAGES: 'packages',
   SALES: 'sales',
+  SALES_REQUESTS: 'sales_requests', // New Store
   DEVICES: 'devices',
   SYNC_QUEUE: 'sync_queue'
 };
@@ -82,6 +83,9 @@ export const initDB = (): Promise<IDBDatabase> => {
       if (!db.objectStoreNames.contains(STORES.SALES)) {
         const store = db.createObjectStore(STORES.SALES, { keyPath: 'id' });
         MOCK_SALES.forEach(s => store.add(s));
+      }
+      if (!db.objectStoreNames.contains(STORES.SALES_REQUESTS)) {
+        db.createObjectStore(STORES.SALES_REQUESTS, { keyPath: 'id' });
       }
       if (!db.objectStoreNames.contains(STORES.SYNC_QUEUE)) {
         db.createObjectStore(STORES.SYNC_QUEUE, { keyPath: 'id', autoIncrement: true });
