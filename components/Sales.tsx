@@ -188,7 +188,7 @@ const Sales: React.FC = () => {
               <p className="text-slate-400 text-[9px] sm:text-[10px] font-black uppercase tracking-widest mb-2">Commissions</p>
               <h3 className="text-2xl sm:text-4xl font-bold text-slate-900 dark:text-white italic tracking-tight">₦124,500</h3>
             </div>
-            <div className="p-4 sm:p-5 bg-blue-50 dark:bg-blue-900/20 text-ubuxa-blue rounded-2xl shrink-0"><DollarSign size={24} sm={28} /></div>
+            <div className="p-4 sm:p-5 bg-blue-50 dark:bg-blue-900/20 text-ubuxa-blue rounded-2xl shrink-0"><DollarSign className="w-6 h-6 sm:w-7 sm:h-7" /></div>
         </div>
       </div>
 
@@ -253,7 +253,7 @@ const Sales: React.FC = () => {
                         <button 
                           key={customer.id}
                           onClick={() => { setSelectedCustomer(customer); setWizardStep(2); }}
-                          className={`w-full p-4 sm:p-6 rounded-[1.5rem] sm:rounded-[2rem] border-2 transition-all flex items-center justify-between group text-left active:scale-[0.98] ${selectedCustomer?.id === customer.id ? 'border-ubuxa-blue bg-blue-50 dark:bg-blue-900/30 shadow-lg' : 'border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-800 hover:border-ubuxa-blue/50'}`}
+                          className={`w-full p-4 sm:p-6 rounded-[1.5rem] sm:rounded-[2rem] border-2 transition-all flex items-center justify-between group text-left active:scale-[0.98] ${selectedCustomer?.id === customer.id ? 'border-ubuxa-blue bg-blue-50 dark:bg-blue-900/30 shadow-xl' : 'border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-800 hover:border-ubuxa-blue/50'}`}
                         >
                           <div className="flex items-center space-x-3 sm:space-x-5 min-w-0">
                             <div className={`w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl flex items-center justify-center transition-all shrink-0 ${selectedCustomer?.id === customer.id ? 'bg-ubuxa-blue text-white shadow-lg' : 'bg-slate-100 dark:bg-slate-700 text-slate-400 group-hover:bg-slate-900 dark:group-hover:bg-slate-900 group-hover:text-white'}`}><User size={20} /></div>
