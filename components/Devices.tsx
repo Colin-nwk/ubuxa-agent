@@ -72,7 +72,7 @@ const Devices: React.FC = () => {
     {
       accessorKey: 'sn',
       header: 'Serial Number',
-      cell: info => <span className="font-bold text-slate-900">{String(info.getValue())}</span>,
+      cell: info => <span className="font-bold text-slate-900 dark:text-white">{String(info.getValue())}</span>,
     },
     {
       accessorKey: 'customer',
@@ -88,7 +88,7 @@ const Devices: React.FC = () => {
       accessorKey: 'token',
       header: 'Generated Token',
       cell: info => (
-        <span className="font-mono text-xs bg-slate-100 px-2 py-1 rounded border border-slate-200 text-slate-700">
+        <span className="font-mono text-xs bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300">
           {String(info.getValue())}
         </span>
       ),
@@ -100,7 +100,7 @@ const Devices: React.FC = () => {
         const duration = String(info.getValue());
         return (
           <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-            duration === 'Unlocking' ? 'bg-gold/10 text-gold border border-gold/20' : 'bg-blue-50 text-blue-600'
+            duration === 'Unlocking' ? 'bg-gold/10 text-gold border border-gold/20' : 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
           }`}>
             {duration}
           </span>
@@ -111,7 +111,7 @@ const Devices: React.FC = () => {
       accessorKey: 'generatedAt',
       header: 'Date',
       cell: info => (
-        <div className="flex items-center space-x-2 text-slate-500 text-xs">
+        <div className="flex items-center space-x-2 text-slate-500 dark:text-slate-400 text-xs">
           <Clock size={12} />
           <span>{String(info.getValue())}</span>
         </div>
@@ -123,12 +123,12 @@ const Devices: React.FC = () => {
     <div className="space-y-6 animate-in fade-in slide-in-from-left-4 duration-500 pb-20 lg:pb-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-serif font-bold text-slate-900">Device Management</h2>
-          <p className="text-slate-500 text-sm">Manage serialized hardware and generate access tokens</p>
+          <h2 className="text-2xl font-serif font-bold text-slate-900 dark:text-white">Device Management</h2>
+          <p className="text-slate-500 dark:text-slate-400 text-sm">Manage serialized hardware and generate access tokens</p>
         </div>
         <button 
           onClick={() => setIsHistoryDrawerOpen(true)}
-          className="bg-white border border-slate-200 text-slate-600 px-6 py-3 rounded-2xl font-bold flex items-center justify-center space-x-2 shadow-sm hover:bg-slate-50 hover:border-gold transition-all"
+          className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 px-6 py-3 rounded-2xl font-bold flex items-center justify-center space-x-2 shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-gold transition-all"
         >
           <History size={20} />
           <span>Token History</span>
@@ -138,21 +138,21 @@ const Devices: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Filter/Search */}
         <div className="lg:col-span-1 space-y-4">
-          <div className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-slate-100 lg:sticky lg:top-8">
-             <h3 className="font-bold text-slate-900 mb-4 text-sm uppercase tracking-widest">Filters</h3>
+          <div className="bg-white dark:bg-slate-900 p-6 rounded-[2.5rem] shadow-sm border border-slate-100 dark:border-slate-800 lg:sticky lg:top-8">
+             <h3 className="font-bold text-slate-900 dark:text-white mb-4 text-sm uppercase tracking-widest">Filters</h3>
              <div className="space-y-4">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
                   <input 
                     type="text" 
                     placeholder="Search Serial or Model..." 
-                    className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 focus:ring-2 focus:ring-gold focus:outline-none transition-all"
+                    className="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-gold focus:outline-none transition-all"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
                 </div>
                 <select 
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 focus:ring-2 focus:ring-gold focus:outline-none transition-all appearance-none cursor-pointer"
+                  className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-gold focus:outline-none transition-all appearance-none cursor-pointer"
                   value={selectedModel}
                   onChange={(e) => setSelectedModel(e.target.value)}
                 >
@@ -192,18 +192,18 @@ const Devices: React.FC = () => {
           {paginatedDevices.length > 0 ? (
             <>
               {paginatedDevices.map((device) => (
-                <div key={device.id} className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-6 hover:border-gold hover:shadow-lg transition-all group">
+                <div key={device.id} className="bg-white dark:bg-slate-900 p-6 rounded-[2.5rem] shadow-sm border border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-6 hover:border-gold hover:shadow-lg transition-all group">
                   <div className="flex items-center space-x-5">
-                    <div className="w-16 h-16 bg-slate-50 rounded-3xl flex items-center justify-center text-slate-400 group-hover:bg-slate-900 group-hover:text-gold transition-colors">
+                    <div className="w-16 h-16 bg-slate-50 dark:bg-slate-800 rounded-3xl flex items-center justify-center text-slate-400 group-hover:bg-slate-900 dark:group-hover:bg-slate-950 group-hover:text-gold transition-colors">
                        <SmartphoneIcon size={32} />
                     </div>
                     <div>
-                      <h4 className="font-bold text-slate-900 text-lg">{device.sn}</h4>
-                      <p className="text-sm text-slate-500">{device.model}</p>
+                      <h4 className="font-bold text-slate-900 dark:text-white text-lg">{device.sn}</h4>
+                      <p className="text-sm text-slate-500 dark:text-slate-400">{device.model}</p>
                       <div className="flex items-center space-x-2 mt-2">
                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                           device.status === 'AVAILABLE' ? 'bg-green-50 text-green-600' : 
-                           device.status === 'USED' ? 'bg-slate-100 text-slate-500' : 'bg-orange-50 text-orange-600'
+                           device.status === 'AVAILABLE' ? 'bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400' : 
+                           device.status === 'USED' ? 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400' : 'bg-orange-50 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400'
                          }`}>
                            {device.status}
                          </span>
@@ -217,7 +217,7 @@ const Devices: React.FC = () => {
                   </div>
                   
                   <div className="flex items-center space-x-3">
-                     <button className="flex-1 sm:flex-none px-6 py-3 bg-slate-50 text-slate-600 rounded-2xl font-bold text-sm hover:bg-slate-100 transition-colors">
+                     <button className="flex-1 sm:flex-none px-6 py-3 bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-2xl font-bold text-sm hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
                        Details
                      </button>
                      {device.tokenable && (
@@ -232,7 +232,7 @@ const Devices: React.FC = () => {
               
               {/* Pagination Controls */}
               {totalPages > 1 && (
-                <div className="px-8 py-6 bg-white rounded-[2rem] border border-slate-100 flex items-center justify-between shadow-sm">
+                <div className="px-8 py-6 bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800 flex items-center justify-between shadow-sm">
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                     Page {currentPage} of {totalPages}
                   </span>
@@ -240,14 +240,14 @@ const Devices: React.FC = () => {
                     <button 
                       onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                       disabled={currentPage === 1}
-                      className="w-10 h-10 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-900 disabled:opacity-30 transition-all shadow-sm"
+                      className="w-10 h-10 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-900 dark:hover:text-white disabled:opacity-30 transition-all shadow-sm"
                     >
                       <ChevronLeftIcon size={18} />
                     </button>
                     <button 
                       onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                       disabled={currentPage === totalPages}
-                      className="w-10 h-10 bg-slate-50 border border-slate-200 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-900 disabled:opacity-30 transition-all shadow-sm"
+                      className="w-10 h-10 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-900 dark:hover:text-white disabled:opacity-30 transition-all shadow-sm"
                     >
                       <ChevronRightIcon size={18} />
                     </button>
@@ -256,12 +256,12 @@ const Devices: React.FC = () => {
               )}
             </>
           ) : (
-            <div className="bg-white p-12 rounded-[2.5rem] border border-slate-100 text-center space-y-3">
-              <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto text-slate-400">
+            <div className="bg-white dark:bg-slate-900 p-12 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 text-center space-y-3">
+              <div className="w-16 h-16 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto text-slate-400">
                 <SmartphoneIcon size={32} />
               </div>
-              <h4 className="text-lg font-bold text-slate-900">No devices found</h4>
-              <p className="text-slate-500 text-sm max-w-xs mx-auto">Try adjusting your filters or search query to find the hardware you're looking for.</p>
+              <h4 className="text-lg font-bold text-slate-900 dark:text-white">No devices found</h4>
+              <p className="text-slate-500 dark:text-slate-400 text-sm max-w-xs mx-auto">Try adjusting your filters or search query to find the hardware you're looking for.</p>
             </div>
           )}
         </div>
@@ -276,13 +276,13 @@ const Devices: React.FC = () => {
         maxWidth="max-w-4xl"
       >
         <div className="space-y-6">
-          <div className="bg-slate-50 p-6 rounded-3xl border border-slate-100 flex items-center space-x-4">
-            <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-gold shadow-sm">
+          <div className="bg-slate-50 dark:bg-slate-800 p-6 rounded-3xl border border-slate-100 dark:border-slate-700 flex items-center space-x-4">
+            <div className="w-12 h-12 bg-white dark:bg-slate-900 rounded-2xl flex items-center justify-center text-gold shadow-sm">
               <History size={24} />
             </div>
             <div>
-              <h4 className="font-bold text-slate-900">Audit Trail</h4>
-              <p className="text-xs text-slate-500">Track device activation and payment-linked tokens.</p>
+              <h4 className="font-bold text-slate-900 dark:text-white">Audit Trail</h4>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Track device activation and payment-linked tokens.</p>
             </div>
           </div>
 
@@ -301,7 +301,7 @@ const StatusBadge: React.FC<{ label: string, active?: boolean, onClick?: () => v
   <button 
     onClick={onClick}
     className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
-      active ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-500 border-slate-200 hover:border-gold'
+      active ? 'bg-slate-900 dark:bg-slate-700 text-white border-slate-900 dark:border-slate-700' : 'bg-white dark:bg-slate-900 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:border-gold'
     }`}
   >
     {label}

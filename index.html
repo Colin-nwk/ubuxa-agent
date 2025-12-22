@@ -3,51 +3,110 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>UBUXA Agent Portal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Ubuxa Agent</title>
     
     <!-- PWA Primary Tags -->
-    <meta name="theme-color" content="#0077C2" />
-    <meta name="description" content="Premium Agent Management Portal" />
+    <meta name="theme-color" content="#0F766E" />
+    <meta name="description" content="Ubuxa Field Agent Application" />
     <link rel="manifest" href="manifest.json" />
     
     <!-- iOS Support -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="UBUXA" />
+    <meta name="apple-mobile-web-app-title" content="Ubuxa" />
     <link rel="apple-touch-icon" href="https://img.icons8.com/color/192/000000/solar-panel.png" />
 
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              primary: '#0F766E', // Teal 700
+              secondary: '#14B8A6', // Teal 500
+              accent: '#F59E0B', // Amber 500
+              danger: '#DC2626',
+              success: '#16A34A',
+              background: {
+                light: '#F9FAFB',
+                dark: '#020617', // Slate 950
+              },
+              text: {
+                primary: '#020617',
+                secondary: '#475569',
+              },
+              slate: {
+                800: '#1e293b',
+                900: '#0f172a',
+                950: '#020617',
+              },
+              'ubuxa-blue': '#0F766E', // Mapping old class to new primary for compatibility
+            },
+            backgroundImage: {
+              'ubuxa-gradient': 'linear-gradient(135deg, #0F766E 0%, #115E59 100%)',
+              'gold-gradient': 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)',
+            },
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+            }
+          }
+        }
+      }
+    </script>
     <style>
       body {
         font-family: 'Inter', sans-serif;
-        background-color: #f8fafc;
+        background-color: #F9FAFB;
+        color: #020617;
+        -webkit-tap-highlight-color: transparent;
+        transition-property: background-color, color;
+        transition-duration: 300ms;
       }
-      .font-serif {
-        font-family: 'Playfair Display', serif;
+      
+      .dark body {
+        background-color: #020617;
+        color: #F1F5F9;
       }
-      /* UBUXA Brand Colors */
-      .bg-ubuxa-blue {
-        background-color: #0077C2;
+
+      /* Custom Scrollbar for desktop */
+      @media (min-width: 1024px) {
+        ::-webkit-scrollbar {
+          width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+          background: #f1f5f9; 
+        }
+        .dark ::-webkit-scrollbar-track {
+          background: #0f172a; 
+        }
+        ::-webkit-scrollbar-thumb {
+          background: #cbd5e1; 
+          border-radius: 4px;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+          background: #334155; 
+        }
+        ::-webkit-scrollbar-thumb:hover {
+          background: #94a3b8; 
+        }
       }
-      .text-ubuxa-blue {
-        color: #0077C2;
+
+      /* Hide scrollbar for mobile cleanliness */
+      .no-scrollbar::-webkit-scrollbar {
+        display: none;
       }
-      .border-ubuxa-blue {
-        border-color: #0077C2;
+      .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
       }
-      /* Custom Corporate Blue Gradient */
-      .bg-ubuxa-gradient {
-        background: linear-gradient(135deg, #0077C2 0%, #00A3E0 100%);
-      }
-      /* Custom Animation for Offline Badge */
-      @keyframes pulse-red {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.6; }
-      }
-      .animate-pulse-red {
-        animation: pulse-red 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+
+      /* Animation Utilities */
+      .transition-visibility {
+        transition-property: visibility;
+        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
       }
     </style>
   <script type="importmap">

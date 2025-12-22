@@ -20,8 +20,8 @@ const CustomersList: React.FC = () => {
       header: 'Customer',
       cell: info => (
         <div className="flex items-center space-x-3">
-          <img src={`https://picsum.photos/seed/${info.row.original.id}/40/40`} className="w-10 h-10 rounded-full border border-slate-200" alt="" />
-          <span className="font-bold text-slate-900">{String(info.getValue())}</span>
+          <img src={`https://picsum.photos/seed/${info.row.original.id}/40/40`} className="w-10 h-10 rounded-full border border-slate-200 dark:border-slate-700" alt="" />
+          <span className="font-bold text-slate-900 dark:text-white">{String(info.getValue())}</span>
         </div>
       ),
     },
@@ -44,7 +44,7 @@ const CustomersList: React.FC = () => {
         const status = String(info.getValue());
         return (
           <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${
-            status === 'ACTIVE' ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'
+            status === 'ACTIVE' ? 'bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400' : 'bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400'
           }`}>
             {status}
           </span>
@@ -56,7 +56,7 @@ const CustomersList: React.FC = () => {
       header: 'Actions',
       cell: () => (
         <DropdownMenu 
-          trigger={<button className="p-2 text-slate-400 hover:text-slate-900 rounded-lg transition-colors bg-slate-50">Manage</button>}
+          trigger={<button className="p-2 text-slate-400 hover:text-slate-900 dark:hover:text-white rounded-lg transition-colors bg-slate-50 dark:bg-slate-800">Manage</button>}
           items={[
             { label: 'View Profile', icon: <Eye size={16} />, onClick: () => {} },
             { label: 'Edit', icon: <Edit size={16} />, onClick: () => {} },
@@ -71,8 +71,8 @@ const CustomersList: React.FC = () => {
     <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-serif font-bold text-slate-900">Customer Registry</h2>
-          <p className="text-slate-500 text-sm">A full directory of all registered customers.</p>
+          <h2 className="text-2xl font-serif font-bold text-slate-900 dark:text-white">Customer Registry</h2>
+          <p className="text-slate-500 dark:text-slate-400 text-sm">A full directory of all registered customers.</p>
         </div>
         <PrimaryButton icon={<UserPlus size={20} />}>
           Register New

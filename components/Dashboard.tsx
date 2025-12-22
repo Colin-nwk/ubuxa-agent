@@ -5,12 +5,10 @@ import {
   TrendingUp, 
   Wallet, 
   Package, 
-  ArrowUpRight, 
-  ArrowDownRight,
-  MoreVertical,
   ShoppingCart
 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { StatCard } from './Shared';
 
 const data = [
   { name: 'Mon', sales: 4000 },
@@ -30,14 +28,14 @@ const Dashboard: React.FC = () => {
         <StatCard 
           title="Total Sales" 
           value="₦2.25M" 
-          icon={<TrendingUp className="text-ubuxa-blue" size={20} />} 
+          icon={<TrendingUp className="text-primary" size={20} />} 
           trend="+12.5%" 
           positive 
         />
         <StatCard 
           title="Active Customers" 
           value="156" 
-          icon={<Users className="text-ubuxa-blue" size={20} />} 
+          icon={<Users className="text-primary" size={20} />} 
           trend="+4.3%" 
           positive 
         />
@@ -59,15 +57,15 @@ const Dashboard: React.FC = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-10">
         {/* Sales Chart */}
-        <div className="lg:col-span-2 bg-white p-5 sm:p-8 rounded-[2rem] sm:rounded-[2.5rem] shadow-sm border border-slate-100">
+        <div className="lg:col-span-2 bg-white dark:bg-slate-900 p-5 sm:p-8 rounded-[2rem] sm:rounded-[2.5rem] shadow-sm border border-slate-100 dark:border-slate-800">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-10">
             <div>
-              <h2 className="text-lg sm:text-xl font-bold text-slate-900">Weekly Performance</h2>
-              <p className="text-xs sm:text-sm text-slate-500 font-medium">Revenue trends across major hubs</p>
+              <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">Weekly Performance</h2>
+              <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium">Revenue trends across major hubs</p>
             </div>
-            <select className="bg-slate-50 border border-slate-200 text-[10px] sm:text-xs font-bold text-slate-900 rounded-xl px-4 py-2 sm:py-2.5 focus:outline-none focus:ring-2 focus:ring-ubuxa-blue transition-all cursor-pointer hover:border-ubuxa-blue">
-              <option className="text-slate-900">Last 7 Days</option>
-              <option className="text-slate-900">Last 30 Days</option>
+            <select className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[10px] sm:text-xs font-bold text-slate-900 dark:text-white rounded-xl px-4 py-2 sm:py-2.5 focus:outline-none focus:ring-2 focus:ring-primary transition-all cursor-pointer hover:border-primary">
+              <option className="text-slate-900 dark:text-white">Last 7 Days</option>
+              <option className="text-slate-900 dark:text-white">Last 30 Days</option>
             </select>
           </div>
           <div className="h-60 sm:h-80">
@@ -75,27 +73,34 @@ const Dashboard: React.FC = () => {
               <AreaChart data={data}>
                 <defs>
                   <linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#0077C2" stopOpacity={0.2}/>
-                    <stop offset="95%" stopColor="#0077C2" stopOpacity={0}/>
+                    <stop offset="5%" stopColor="#0F766E" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="#0F766E" stopOpacity={0}/>
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#334155" opacity={0.2} />
                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 10, fill: '#94a3b8', fontWeight: 600}} dy={10} />
                 <YAxis axisLine={false} tickLine={false} tick={{fontSize: 10, fill: '#94a3b8', fontWeight: 600}} />
                 <Tooltip 
-                  contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', fontWeight: 700 }}
+                  contentStyle={{ 
+                    borderRadius: '16px', 
+                    border: 'none', 
+                    boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', 
+                    fontWeight: 700,
+                    backgroundColor: 'rgba(255, 255, 255, 0.9)', 
+                    color: '#0f172a'
+                  }}
                 />
-                <Area type="monotone" dataKey="sales" stroke="#0077C2" strokeWidth={3} fillOpacity={1} fill="url(#colorSales)" dot={{ r: 3, fill: '#0077C2', strokeWidth: 2, stroke: '#fff' }} />
+                <Area type="monotone" dataKey="sales" stroke="#0F766E" strokeWidth={3} fillOpacity={1} fill="url(#colorSales)" dot={{ r: 3, fill: '#0F766E', strokeWidth: 2, stroke: '#fff' }} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
         </div>
 
         {/* Recent Activity */}
-        <div className="bg-white p-5 sm:p-8 rounded-[2rem] sm:rounded-[2.5rem] shadow-sm border border-slate-100 flex flex-col">
+        <div className="bg-white dark:bg-slate-900 p-5 sm:p-8 rounded-[2rem] sm:rounded-[2.5rem] shadow-sm border border-slate-100 dark:border-slate-800 flex flex-col">
           <div className="flex justify-between items-center mb-6 sm:mb-8">
-            <h2 className="text-lg sm:text-xl font-bold text-slate-900">Recent Sales</h2>
-            <button className="text-ubuxa-blue text-xs sm:text-sm font-bold hover:underline px-3 py-1 bg-blue-50 rounded-lg transition-colors">View All</button>
+            <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">Recent Sales</h2>
+            <button className="text-primary text-xs sm:text-sm font-bold hover:underline px-3 py-1 bg-blue-50 dark:bg-blue-900/20 rounded-lg transition-colors">View All</button>
           </div>
           <div className="space-y-6 sm:space-y-8 flex-1">
             <ActivityItem 
@@ -117,9 +122,9 @@ const Dashboard: React.FC = () => {
               status="SUCCESS"
             />
           </div>
-          <div className="mt-6 sm:mt-8 p-4 sm:p-6 bg-slate-50 rounded-2xl sm:rounded-[2rem] border border-slate-100 border-dashed text-center">
+          <div className="mt-6 sm:mt-8 p-4 sm:p-6 bg-slate-50 dark:bg-slate-800 rounded-2xl sm:rounded-[2rem] border border-slate-100 dark:border-slate-700 border-dashed text-center">
             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Performance Insight</p>
-            <p className="text-xs sm:text-sm font-bold text-slate-700 mt-2">You are 12% ahead of your weekly quota!</p>
+            <p className="text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300 mt-2">You are 12% ahead of your weekly quota!</p>
           </div>
         </div>
       </div>
@@ -127,40 +132,18 @@ const Dashboard: React.FC = () => {
   );
 };
 
-const StatCard: React.FC<{ title: string, value: string, icon: React.ReactNode, trend: string, positive: boolean }> = ({ title, value, icon, trend, positive }) => (
-  <div className="bg-white p-6 sm:p-8 rounded-[1.5rem] sm:rounded-[2.5rem] shadow-sm border border-slate-100 group hover:border-ubuxa-blue transition-all duration-300 hover:shadow-xl hover:-translate-y-1 active:scale-[0.98]">
-    <div className="flex justify-between items-start mb-4 sm:mb-6">
-      <div className="p-3 sm:p-4 bg-slate-50 rounded-xl sm:rounded-2xl group-hover:bg-ubuxa-gradient group-hover:text-white transition-all duration-500 shadow-sm shrink-0">
-        {icon}
-      </div>
-      <button className="text-slate-300 hover:text-slate-900 transition-colors">
-        <MoreVertical size={18} />
-      </button>
-    </div>
-    <div>
-      <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest truncate">{title}</p>
-      <div className="flex items-baseline space-x-2 mt-1.5 sm:mt-2 overflow-hidden">
-        <h3 className="text-xl sm:text-3xl font-bold text-slate-900 tracking-tight italic">{value}</h3>
-        <span className={`text-[9px] sm:text-[11px] font-black flex items-center px-1.5 py-0.5 rounded-lg shrink-0 ${positive ? 'text-green-600 bg-green-50' : 'text-red-600 bg-red-50'}`}>
-          {trend}
-        </span>
-      </div>
-    </div>
-  </div>
-);
-
 const ActivityItem: React.FC<{ title: string, subtitle: string, time: string, status: 'SUCCESS' | 'PENDING' }> = ({ title, subtitle, time, status }) => (
-  <div className="flex items-center space-x-4 sm:space-x-5 group cursor-pointer active:bg-slate-50 rounded-xl transition-all">
-    <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center transition-all shrink-0 ${status === 'SUCCESS' ? 'bg-blue-50 text-ubuxa-blue' : 'bg-orange-50 text-orange-600'} group-hover:scale-110 shadow-sm`}>
+  <div className="flex items-center space-x-4 sm:space-x-5 group cursor-pointer active:bg-slate-50 dark:active:bg-slate-800 rounded-xl transition-all">
+    <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl flex items-center justify-center transition-all shrink-0 ${status === 'SUCCESS' ? 'bg-blue-50 dark:bg-blue-900/30 text-primary' : 'bg-orange-50 dark:bg-orange-900/30 text-orange-600'} group-hover:scale-110 shadow-sm`}>
       <ShoppingCart size={18} sm={20} />
     </div>
     <div className="flex-1 min-w-0">
-      <h4 className="text-sm font-bold text-slate-900 leading-none group-hover:text-ubuxa-blue transition-colors truncate">{title}</h4>
-      <p className="text-[11px] sm:text-xs text-slate-500 mt-1.5 font-medium truncate">{subtitle}</p>
+      <h4 className="text-sm font-bold text-slate-900 dark:text-white leading-none group-hover:text-primary transition-colors truncate">{title}</h4>
+      <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 mt-1.5 font-medium truncate">{subtitle}</p>
     </div>
     <div className="text-right shrink-0">
       <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{time}</p>
-      <span className={`text-[9px] font-black px-2 py-0.5 rounded-lg mt-1 inline-block ${status === 'SUCCESS' ? 'bg-green-50 text-green-600' : 'bg-orange-50 text-orange-600'}`}>
+      <span className={`text-[9px] font-black px-2 py-0.5 rounded-lg mt-1 inline-block ${status === 'SUCCESS' ? 'bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400' : 'bg-orange-50 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400'}`}>
         {status}
       </span>
     </div>

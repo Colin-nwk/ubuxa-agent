@@ -104,8 +104,8 @@ const Packages: React.FC = () => {
     <div className="space-y-10 animate-in fade-in duration-500 pb-20 lg:pb-12">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h2 className="text-3xl font-bold text-slate-900 tracking-tight">System Bundles</h2>
-          <p className="text-slate-500 font-medium text-sm mt-1">Configure curated equipment sets for accelerated sales</p>
+          <h2 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">System Bundles</h2>
+          <p className="text-slate-500 dark:text-slate-400 font-medium text-sm mt-1">Configure curated equipment sets for accelerated sales</p>
         </div>
         <PrimaryButton onClick={() => setIsAddDrawerOpen(true)} icon={<Plus size={22} strokeWidth={3} />}>
           New Bundle Definition
@@ -132,18 +132,18 @@ const Packages: React.FC = () => {
         />
       </div>
 
-      <div className="bg-white p-6 rounded-[2.5rem] shadow-sm border border-slate-100 flex flex-col md:flex-row gap-6 items-center">
+      <div className="bg-white dark:bg-slate-900 p-6 rounded-[2.5rem] shadow-sm border border-slate-100 dark:border-slate-800 flex flex-col md:flex-row gap-6 items-center">
         <div className="relative flex-1 w-full group">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-ubuxa-blue transition-colors" size={20} />
           <input 
             type="text" 
             placeholder="Search by bundle name or hardware component..." 
-            className="w-full pl-14 pr-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-ubuxa-blue transition-all"
+            className="w-full pl-14 pr-6 py-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-ubuxa-blue transition-all"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        <button className="px-8 py-4 bg-slate-900 text-white rounded-2xl text-xs font-black uppercase tracking-widest flex items-center space-x-3 hover:bg-slate-800 transition-colors shadow-lg">
+        <button className="px-8 py-4 bg-slate-900 dark:bg-slate-800 text-white rounded-2xl text-xs font-black uppercase tracking-widest flex items-center space-x-3 hover:bg-slate-800 dark:hover:bg-slate-700 transition-colors shadow-lg">
           <Filter size={20} />
           <span>Category Map</span>
         </button>
@@ -151,22 +151,22 @@ const Packages: React.FC = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
         {paginatedPackages.map((pkg) => (
-          <div key={pkg.id} className="bg-white rounded-[3.5rem] border border-slate-100 shadow-sm overflow-hidden hover:border-ubuxa-blue hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 group">
+          <div key={pkg.id} className="bg-white dark:bg-slate-900 rounded-[3.5rem] border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden hover:border-ubuxa-blue dark:hover:border-ubuxa-blue hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 group">
             <div className="p-10 flex flex-col h-full">
               <div className="flex justify-between items-start mb-8">
                 <div className="flex-1">
                    <div className="flex items-center space-x-3 mb-4">
-                     <span className="px-3 py-1 bg-slate-900 text-white rounded-xl text-[9px] font-black uppercase tracking-[0.2em]">{pkg.category}</span>
+                     <span className="px-3 py-1 bg-slate-900 dark:bg-slate-700 text-white rounded-xl text-[9px] font-black uppercase tracking-[0.2em]">{pkg.category}</span>
                      {pkg.popular && (
-                       <span className="px-3 py-1 bg-blue-50 text-ubuxa-blue border border-blue-100 rounded-xl text-[9px] font-black uppercase tracking-[0.2em] flex items-center shadow-sm">
+                       <span className="px-3 py-1 bg-blue-50 dark:bg-blue-900/30 text-ubuxa-blue border border-blue-100 dark:border-blue-900/50 rounded-xl text-[9px] font-black uppercase tracking-[0.2em] flex items-center shadow-sm">
                          <CheckCircle2 size={12} className="mr-1.5" />
                          Trending
                        </span>
                      )}
                    </div>
-                   <h3 className="text-3xl font-bold text-slate-900 group-hover:text-ubuxa-blue transition-colors tracking-tight italic">{pkg.name}</h3>
+                   <h3 className="text-3xl font-bold text-slate-900 dark:text-white group-hover:text-ubuxa-blue transition-colors tracking-tight italic">{pkg.name}</h3>
                 </div>
-                <button className="p-3 text-slate-300 hover:text-slate-900 transition-colors bg-slate-50 rounded-2xl">
+                <button className="p-3 text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors bg-slate-50 dark:bg-slate-800 rounded-2xl">
                   <MoreVertical size={24} />
                 </button>
               </div>
@@ -175,7 +175,7 @@ const Packages: React.FC = () => {
                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.25em] pl-2">System Components</p>
                 <div className="grid grid-cols-1 gap-3">
                   {pkg.items.map((item, idx) => (
-                    <div key={idx} className="flex items-center text-sm font-bold text-slate-600 bg-slate-50 p-4 rounded-2xl border border-slate-100 group-hover:bg-white group-hover:border-blue-100 transition-all">
+                    <div key={idx} className="flex items-center text-sm font-bold text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-700 group-hover:bg-white dark:group-hover:bg-slate-900 group-hover:border-blue-100 dark:group-hover:border-blue-900 transition-all">
                       <div className="w-2 h-2 bg-ubuxa-blue rounded-full mr-4 shadow-blue-500/20" />
                       {item}
                     </div>
@@ -183,10 +183,10 @@ const Packages: React.FC = () => {
                 </div>
               </div>
 
-              <div className="pt-8 border-t border-slate-50 flex items-center justify-between mt-auto">
+              <div className="pt-8 border-t border-slate-50 dark:border-slate-800 flex items-center justify-between mt-auto">
                 <div>
                   <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 opacity-70">Package Value</p>
-                  <p className="text-3xl font-black text-slate-900 tracking-tighter italic">₦{pkg.price.toLocaleString()}</p>
+                  <p className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter italic">₦{pkg.price.toLocaleString()}</p>
                 </div>
                 <button className="w-16 h-16 bg-ubuxa-gradient text-white rounded-[1.5rem] flex items-center justify-center shadow-xl shadow-blue-500/20 group-hover:scale-110 active:scale-90 transition-all">
                   <ArrowRight size={32} />
@@ -198,7 +198,7 @@ const Packages: React.FC = () => {
       </div>
 
       {totalPages > 1 && (
-        <div className="px-10 py-6 bg-white rounded-[3rem] border border-slate-100 flex items-center justify-between shadow-sm">
+        <div className="px-10 py-6 bg-white dark:bg-slate-900 rounded-[3rem] border border-slate-100 dark:border-slate-800 flex items-center justify-between shadow-sm">
           <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">
             Page {currentPage} of {totalPages}
           </span>
@@ -206,14 +206,14 @@ const Packages: React.FC = () => {
             <button 
               onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
               disabled={currentPage === 1}
-              className="w-12 h-12 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-center text-slate-400 hover:text-ubuxa-blue hover:border-ubuxa-blue disabled:opacity-30 transition-all shadow-sm active:scale-90"
+              className="w-12 h-12 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl flex items-center justify-center text-slate-400 hover:text-ubuxa-blue hover:border-ubuxa-blue disabled:opacity-30 transition-all shadow-sm active:scale-90"
             >
               <ChevronLeftIcon size={22} />
             </button>
             <button 
               onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
-              className="w-12 h-12 bg-slate-50 border border-slate-200 rounded-2xl flex items-center justify-center text-slate-400 hover:text-ubuxa-blue hover:border-ubuxa-blue disabled:opacity-30 transition-all shadow-sm active:scale-90"
+              className="w-12 h-12 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl flex items-center justify-center text-slate-400 hover:text-ubuxa-blue hover:border-ubuxa-blue disabled:opacity-30 transition-all shadow-sm active:scale-90"
             >
               <ChevronRightIcon size={22} />
             </button>
@@ -248,18 +248,18 @@ const Packages: React.FC = () => {
 
           <Input label="Set Retail Value (₦)" type="number" placeholder="0.00" icon={<ShoppingBag size={22} />} />
 
-          <div className="p-8 bg-slate-50 border border-slate-200 rounded-[2.5rem] shadow-sm">
-             <div className="flex items-center space-x-4 mb-6 text-slate-900">
-                <div className="p-2 bg-white rounded-xl shadow-sm"><TrendingUp size={20} className="text-ubuxa-blue" /></div>
+          <div className="p-8 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-[2.5rem] shadow-sm">
+             <div className="flex items-center space-x-4 mb-6 text-slate-900 dark:text-white">
+                <div className="p-2 bg-white dark:bg-slate-700 rounded-xl shadow-sm"><TrendingUp size={20} className="text-ubuxa-blue" /></div>
                 <h5 className="font-bold text-sm uppercase tracking-widest">Visibility Controls</h5>
              </div>
              <div className="space-y-6">
                <div className="flex items-center justify-between">
-                 <span className="text-sm font-bold text-slate-600">Highlight as Trending</span>
+                 <span className="text-sm font-bold text-slate-600 dark:text-slate-300">Highlight as Trending</span>
                  <input type="checkbox" className="w-6 h-6 rounded-lg accent-ubuxa-blue border-slate-300" />
                </div>
                <div className="flex items-center justify-between">
-                 <span className="text-sm font-bold text-slate-600">Enable Finance Protocol</span>
+                 <span className="text-sm font-bold text-slate-600 dark:text-slate-300">Enable Finance Protocol</span>
                  <input type="checkbox" defaultChecked className="w-6 h-6 rounded-lg accent-ubuxa-blue border-slate-300" />
                </div>
              </div>

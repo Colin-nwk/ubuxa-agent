@@ -38,15 +38,15 @@ const Reports: React.FC = () => {
     <div className="space-y-10 animate-in slide-in-from-top-4 duration-500">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h2 className="text-3xl font-bold text-slate-900 tracking-tight">System Intelligence</h2>
-          <p className="text-slate-500 font-medium text-sm mt-1">Audit sales performance and hub efficiency trends</p>
+          <h2 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">System Intelligence</h2>
+          <p className="text-slate-500 dark:text-slate-400 font-medium text-sm mt-1">Audit sales performance and hub efficiency trends</p>
         </div>
         <div className="flex items-center space-x-4">
-          <button className="bg-white border border-slate-200 px-6 py-4 rounded-2xl font-bold flex items-center space-x-3 text-slate-600 hover:bg-slate-50 transition-all shadow-sm">
+          <button className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-6 py-4 rounded-2xl font-bold flex items-center space-x-3 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all shadow-sm">
             <Calendar size={20} />
             <span>Select Period</span>
           </button>
-          <button className="bg-slate-900 text-white px-8 py-4 rounded-2xl font-bold flex items-center space-x-3 shadow-xl shadow-slate-200 hover:bg-slate-800 transition-all active:scale-95">
+          <button className="bg-slate-900 dark:bg-slate-800 text-white px-8 py-4 rounded-2xl font-bold flex items-center space-x-3 shadow-xl shadow-slate-200 dark:shadow-slate-900 hover:bg-slate-800 dark:hover:bg-slate-700 transition-all active:scale-95">
             <Download size={20} />
             <span>Export Audit</span>
           </button>
@@ -55,13 +55,13 @@ const Reports: React.FC = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
         {/* Performance Trend */}
-        <div className="bg-white p-10 rounded-[3.5rem] shadow-sm border border-slate-100 flex flex-col">
+        <div className="bg-white dark:bg-slate-900 p-10 rounded-[3.5rem] shadow-sm border border-slate-100 dark:border-slate-800 flex flex-col">
           <div className="flex justify-between items-start mb-10">
              <div>
-                <h3 className="text-2xl font-bold text-slate-900 tracking-tight">Revenue Stream</h3>
+                <h3 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Revenue Stream</h3>
                 <p className="text-xs text-slate-400 font-black uppercase tracking-widest mt-1">LTM Growth Protocol</p>
              </div>
-             <div className="bg-blue-50 text-ubuxa-blue px-4 py-1.5 rounded-xl text-xs font-black uppercase flex items-center">
+             <div className="bg-blue-50 dark:bg-blue-900/30 text-ubuxa-blue px-4 py-1.5 rounded-xl text-xs font-black uppercase flex items-center">
                 <TrendingUp size={14} className="mr-2" />
                 +24% Growth
              </div>
@@ -75,11 +75,11 @@ const Reports: React.FC = () => {
                       <stop offset="95%" stopColor="#0077C2" stopOpacity={0}/>
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#334155" opacity={0.2} />
                   <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 12, fill: '#94a3b8', fontWeight: 600}} dy={10} />
                   <YAxis axisLine={false} tickLine={false} tick={{fontSize: 12, fill: '#94a3b8', fontWeight: 600}} />
                   <Tooltip 
-                    contentStyle={{ borderRadius: '24px', border: 'none', boxShadow: '0 25px 50px -12px rgb(0 0 0 / 0.15)', fontWeight: 700 }}
+                    contentStyle={{ borderRadius: '24px', border: 'none', boxShadow: '0 25px 50px -12px rgb(0 0 0 / 0.15)', fontWeight: 700, backgroundColor: 'rgba(255, 255, 255, 0.9)', color: '#0f172a' }}
                   />
                   <Area type="monotone" dataKey="revenue" stroke="#0077C2" strokeWidth={5} fillOpacity={1} fill="url(#colorRev)" />
                 </AreaChart>
@@ -88,21 +88,21 @@ const Reports: React.FC = () => {
         </div>
 
         {/* Volume Distribution */}
-        <div className="bg-white p-10 rounded-[3.5rem] shadow-sm border border-slate-100 flex flex-col">
+        <div className="bg-white dark:bg-slate-900 p-10 rounded-[3.5rem] shadow-sm border border-slate-100 dark:border-slate-800 flex flex-col">
           <div className="flex justify-between items-start mb-10">
              <div>
-                <h3 className="text-2xl font-bold text-slate-900 tracking-tight">Sales Density</h3>
+                <h3 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Sales Density</h3>
                 <p className="text-xs text-slate-400 font-black uppercase tracking-widest mt-1">Regional Unit Distribution</p>
              </div>
-             <Box size={24} className="text-slate-300" />
+             <Box size={24} className="text-slate-300 dark:text-slate-600" />
           </div>
           <div className="h-80 flex-1">
              <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={barData}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#334155" opacity={0.2} />
                   <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 12, fill: '#94a3b8', fontWeight: 600}} dy={10} />
                   <YAxis axisLine={false} tickLine={false} tick={{fontSize: 12, fill: '#94a3b8', fontWeight: 600}} />
-                  <Tooltip cursor={{fill: '#f8fafc'}} contentStyle={{ borderRadius: '24px', border: 'none', boxShadow: '0 25px 50px -12px rgb(0 0 0 / 0.15)' }} />
+                  <Tooltip cursor={{fill: '#f8fafc'}} contentStyle={{ borderRadius: '24px', border: 'none', boxShadow: '0 25px 50px -12px rgb(0 0 0 / 0.15)', backgroundColor: 'rgba(255, 255, 255, 0.9)', color: '#0f172a' }} />
                   <Bar dataKey="value" radius={[12, 12, 12, 12]} barSize={40}>
                     {barData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -127,7 +127,7 @@ const Reports: React.FC = () => {
           value="₦420,000" 
           subtitle="Average lifetime unit value" 
           icon={<ArrowUpRight size={24} />} 
-          color="bg-slate-900" 
+          color="bg-slate-900 dark:bg-slate-800" 
          />
          <ReportMetric 
           title="Network Tier" 
@@ -142,19 +142,19 @@ const Reports: React.FC = () => {
 };
 
 const ReportMetric: React.FC<{ title: string, value: string, subtitle: string, icon: React.ReactNode, color: string }> = ({ title, value, subtitle, icon, color }) => (
-  <div className="bg-white p-8 rounded-[3rem] shadow-sm border border-slate-100 flex items-center justify-between group hover:border-ubuxa-blue transition-all duration-500 hover:shadow-xl hover:-translate-y-1">
+  <div className="bg-white dark:bg-slate-900 p-8 rounded-[3rem] shadow-sm border border-slate-100 dark:border-slate-800 flex items-center justify-between group hover:border-ubuxa-blue transition-all duration-500 hover:shadow-xl hover:-translate-y-1">
     <div className="flex items-center space-x-6">
       <div className={`w-16 h-16 ${color} rounded-[1.5rem] flex items-center justify-center text-white shadow-lg group-hover:rotate-12 transition-transform`}>
         {icon}
       </div>
       <div>
         <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">{title}</p>
-        <h3 className="text-2xl font-bold text-slate-900 italic tracking-tight mt-1">{value}</h3>
-        <p className="text-xs text-slate-500 mt-1 font-medium">{subtitle}</p>
+        <h3 className="text-2xl font-bold text-slate-900 dark:text-white italic tracking-tight mt-1">{value}</h3>
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-medium">{subtitle}</p>
       </div>
     </div>
     <div className="hidden sm:block">
-       <button className="w-10 h-10 bg-slate-50 text-slate-300 rounded-xl flex items-center justify-center group-hover:bg-ubuxa-blue group-hover:text-white transition-all">
+       <button className="w-10 h-10 bg-slate-50 dark:bg-slate-800 text-slate-300 dark:text-slate-500 rounded-xl flex items-center justify-center group-hover:bg-ubuxa-blue group-hover:text-white transition-all">
           <ChevronRight size={24} />
        </button>
     </div>

@@ -17,7 +17,7 @@ const DevicesList: React.FC = () => {
     {
       accessorKey: 'sn',
       header: 'Serial Number',
-      cell: info => <span className="font-bold text-slate-900">{String(info.getValue())}</span>,
+      cell: info => <span className="font-bold text-slate-900 dark:text-white">{String(info.getValue())}</span>,
     },
     {
       accessorKey: 'model',
@@ -32,7 +32,7 @@ const DevicesList: React.FC = () => {
     {
       accessorKey: 'customer',
       header: 'Assigned Client',
-      cell: info => <span className="text-slate-600 italic">{String(info.getValue())}</span>,
+      cell: info => <span className="text-slate-600 dark:text-slate-300 italic">{String(info.getValue())}</span>,
     },
     {
       accessorKey: 'status',
@@ -41,8 +41,8 @@ const DevicesList: React.FC = () => {
         const status = String(info.getValue());
         return (
           <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-            status === 'AVAILABLE' ? 'bg-green-50 text-green-600' : 
-            status === 'USED' ? 'bg-slate-100 text-slate-500' : 'bg-orange-50 text-orange-600'
+            status === 'AVAILABLE' ? 'bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400' : 
+            status === 'USED' ? 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400' : 'bg-orange-50 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400'
           }`}>
             {status}
           </span>
@@ -52,14 +52,14 @@ const DevicesList: React.FC = () => {
     {
       accessorKey: 'tokenable',
       header: 'Features',
-      cell: info => info.getValue() ? <span className="px-1.5 py-0.5 bg-gold/10 text-gold border border-gold/20 text-[8px] font-bold uppercase rounded">PAYGO-Enabled</span> : <span className="text-[8px] font-bold text-slate-300 uppercase">Standard</span>,
+      cell: info => info.getValue() ? <span className="px-1.5 py-0.5 bg-gold/10 text-gold border border-gold/20 text-[8px] font-bold uppercase rounded">PAYGO-Enabled</span> : <span className="text-[8px] font-bold text-slate-300 dark:text-slate-600 uppercase">Standard</span>,
     },
     {
       id: 'actions',
       header: 'Hardware Control',
       cell: (info) => (
         <DropdownMenu 
-          trigger={<button className="p-2 text-slate-600 hover:text-slate-900 rounded-lg bg-slate-50 font-bold text-xs">Manage</button>}
+          trigger={<button className="p-2 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white rounded-lg bg-slate-50 dark:bg-slate-800 font-bold text-xs">Manage</button>}
           items={[
             { label: 'Generate Token', icon: <Key size={14} />, onClick: () => {} },
             { label: 'View Audit Logs', icon: <History size={14} />, onClick: () => {} },
@@ -74,8 +74,8 @@ const DevicesList: React.FC = () => {
     <div className="space-y-6 animate-in slide-in-from-top-4 duration-500">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-serif font-bold text-slate-900">Hardware Index</h2>
-          <p className="text-slate-500 text-sm">Audit all serialized devices and check token compatibility.</p>
+          <h2 className="text-2xl font-serif font-bold text-slate-900 dark:text-white">Hardware Index</h2>
+          <p className="text-slate-500 dark:text-slate-400 text-sm">Audit all serialized devices and check token compatibility.</p>
         </div>
       </div>
 
