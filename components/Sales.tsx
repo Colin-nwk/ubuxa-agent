@@ -34,12 +34,16 @@ import {
   Trash2,
   Send,
   Archive,
-  CloudOff
+  CloudOff,
+  Globe
 } from 'lucide-react';
 import { BottomSheetModal, PrimaryButton, SecondaryButton, Input, SignaturePad, Select, FileUpload, Tabs, Toast } from './Shared';
 import { getAllFromStore, addItemToStore, addToSyncQueue, updateItemInStore, deleteFromStore } from '../utils/db';
 
 const ITEMS_PER_PAGE = 5;
+
+// Mock Agent Status (In a real app, this comes from Auth Context)
+const AGENT_IS_VERIFIED = true; 
 
 const Sales: React.FC = () => {
   // DB Data State
@@ -84,11 +88,20 @@ const Sales: React.FC = () => {
   const [editingRequestId, setEditingRequestId] = useState<string | null>(null);
   const [requestStep, setRequestStep] = useState(1);
   const [reqData, setReqData] = useState({
+    // Customer
     firstName: '', lastName: '', phone: '', email: '', address: '',
+    addressState: '', addressLGA: '', addressType: 'Home',
+    // Package
     packageId: '', packageName: '', packagePrice: 0,
+    // Payment
     paymentType: 'FINANCED', downPayment: '', tenor: '12',
-    idType: 'NIN', idNumber: '', idImage: null as any,
-    guarantorName: '', guarantorPhone: '', guarantorRel: 'Family',
+    // Identity
+    idType: 'NIN', idNumber: '', idImage: null as any, idExpiry: '',
+    // Guarantor
+    guarantorName: '', guarantorPhone: '', guarantorRel: 'Family', 
+    guarantorEmail: '', guarantorAddress: '', guarantorIdType: 'NIN', guarantorIdNumber: '',
+    guarantorSignature: null as string | null,
+    // Logistics
     deviceSns: [] as string[],
     nokName: '', nokPhone: '',
     installFee: '', accessoriesCost: '',
@@ -142,10 +155,13 @@ const Sales: React.FC = () => {
       setRequestStep(1);
       setReqData({
         firstName: '', lastName: '', phone: '', email: '', address: '',
+        addressState: '', addressLGA: '', addressType: 'Home',
         packageId: '', packageName: '', packagePrice: 0,
         paymentType: 'FINANCED', downPayment: '', tenor: '12',
-        idType: 'NIN', idNumber: '', idImage: null,
+        idType: 'NIN', idNumber: '', idImage: null, idExpiry: '',
         guarantorName: '', guarantorPhone: '', guarantorRel: 'Family',
+        guarantorEmail: '', guarantorAddress: '', guarantorIdType: 'NIN', guarantorIdNumber: '',
+        guarantorSignature: null,
         deviceSns: [],
         nokName: '', nokPhone: '',
         installFee: '', accessoriesCost: '',
@@ -175,13 +191,21 @@ const Sales: React.FC = () => {
 
   const completeRequest = async () => {
       const isOffline = !navigator.onLine;
+      
+      // PRD Logic: Verified Agent gets Verified Status immediately (simulated), Unverified gets Pending
+      // In a real backend, this status is determined by the server.
+      const initialStatus = AGENT_IS_VERIFIED ? 'APPROVED' : 'PENDING_APPROVAL';
+      
       const newRequest = {
           id: editingRequestId || `REQ-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`,
           ...reqData,
           date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-          status: 'PENDING_APPROVAL',
+          status: initialStatus,
           syncStatus: isOffline ? 'PENDING_SYNC' : 'SYNCED',
-          lastModified: Date.now()
+          lastModified: Date.now(),
+          // Generate temp account if verified (simulated)
+          tempAccount: AGENT_IS_VERIFIED ? `99${Math.floor(10000000 + Math.random() * 90000000)}` : null,
+          tempAccountExpiry: AGENT_IS_VERIFIED ? Date.now() + 3600000 : null // 1 hour
       };
       
       if (editingRequestId) {
@@ -189,10 +213,16 @@ const Sales: React.FC = () => {
           setToast({ title: 'Request Updated', message: 'Changes have been saved successfully.', type: 'success' });
       } else {
           await addItemToStore('sales_requests', newRequest);
+          if (AGENT_IS_VERIFIED) {
+             setToast({ title: 'Request Approved', message: 'Temporary account generated for payment.', type: 'success' });
+          } else {
+             setToast({ title: 'Request Submitted', message: 'Sent for admin approval.', type: 'info' });
+          }
       }
 
       if (isOffline) {
           await addToSyncQueue({ type: 'CREATE_REQUEST', payload: newRequest });
+          setToast({ title: 'Saved Offline', message: 'Request will sync when online.', type: 'warning' });
       }
       
       resetRequestFlow();
@@ -200,27 +230,29 @@ const Sales: React.FC = () => {
   };
 
   const handleRetrySync = async (req: any) => {
-      // Simulate sync
       const updated = { ...req, syncStatus: 'SYNCED', lastModified: Date.now() };
       await updateItemInStore('sales_requests', updated);
-      // In a real app, we would remove from sync_queue here too
-      setIsSuccess(prev => !prev); // Trigger refresh
+      setIsSuccess(prev => !prev); 
       setToast({ title: 'Synced Successfully', message: 'Request has been sent to the server.', type: 'success' });
   };
 
   const handleDeleteRequest = async (id: string) => {
       await deleteFromStore('sales_requests', id);
-      setIsSuccess(prev => !prev); // Trigger refresh
+      setIsSuccess(prev => !prev);
       setToast({ title: 'Request Deleted', message: 'The local request has been removed.', type: 'info' });
   };
 
   const handleEditRequest = (req: any) => {
       setReqData({
           firstName: req.firstName, lastName: req.lastName, phone: req.phone, email: req.email, address: req.address,
+          addressState: req.addressState || '', addressLGA: req.addressLGA || '', addressType: req.addressType || 'Home',
           packageId: req.packageId, packageName: req.packageName, packagePrice: req.packagePrice,
           paymentType: req.paymentType, downPayment: req.downPayment, tenor: req.tenor,
-          idType: req.idType, idNumber: req.idNumber, idImage: req.idImage,
+          idType: req.idType, idNumber: req.idNumber, idImage: req.idImage, idExpiry: req.idExpiry || '',
           guarantorName: req.guarantorName, guarantorPhone: req.guarantorPhone, guarantorRel: req.guarantorRel,
+          guarantorEmail: req.guarantorEmail || '', guarantorAddress: req.guarantorAddress || '', 
+          guarantorIdType: req.guarantorIdType || 'NIN', guarantorIdNumber: req.guarantorIdNumber || '',
+          guarantorSignature: req.guarantorSignature || null,
           deviceSns: req.deviceSns,
           nokName: req.nokName, nokPhone: req.nokPhone,
           installFee: req.installFee, accessoriesCost: req.accessoriesCost
@@ -458,9 +490,9 @@ const Sales: React.FC = () => {
                                 </button>
                             </>
                          ) : (
-                            <div className="px-4 py-2 bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 rounded-xl text-xs font-bold flex items-center space-x-2">
+                            <div className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center space-x-2 ${req.status === 'APPROVED' ? 'bg-green-100 text-green-700' : 'bg-blue-50 text-blue-600'}`}>
                                <CheckCircle2 size={14} />
-                               <span>Sent to HQ</span>
+                               <span>{req.status === 'APPROVED' ? 'Approved' : 'Pending Review'}</span>
                             </div>
                          )}
                       </div>
@@ -511,7 +543,22 @@ const Sales: React.FC = () => {
                     </div>
                     <Input label="Phone Number" value={reqData.phone} onChange={e => setReqData({...reqData, phone: e.target.value})} placeholder="+234..." type="tel" icon={<Smartphone size={18} />} />
                     <Input label="Email (Optional)" value={reqData.email} onChange={e => setReqData({...reqData, email: e.target.value})} placeholder="email@example.com" type="email" />
-                    <Input label="Address" value={reqData.address} onChange={e => setReqData({...reqData, address: e.target.value})} icon={<MapPin size={18} />} />
+                    <div className="space-y-4">
+                        <Input label="Street Address" value={reqData.address} onChange={e => setReqData({...reqData, address: e.target.value})} icon={<MapPin size={18} />} />
+                        <div className="grid grid-cols-2 gap-4">
+                            <Select label="State" value={reqData.addressState} onChange={e => setReqData({...reqData, addressState: e.target.value})}>
+                                <option value="">Select State</option>
+                                <option value="Lagos">Lagos</option>
+                                <option value="Abuja">Abuja</option>
+                                <option value="Rivers">Rivers</option>
+                            </Select>
+                            <Input label="LGA" value={reqData.addressLGA} onChange={e => setReqData({...reqData, addressLGA: e.target.value})} placeholder="Local Govt." />
+                        </div>
+                        <Select label="Address Type" value={reqData.addressType} onChange={e => setReqData({...reqData, addressType: e.target.value})}>
+                            <option value="Home">Home</option>
+                            <option value="Work">Work</option>
+                        </Select>
+                    </div>
                 </div>
             )}
 
@@ -561,12 +608,15 @@ const Sales: React.FC = () => {
             {requestStep === 4 && (
                 <div className="space-y-4 animate-in slide-in-from-right-4">
                     <h4 className="font-bold text-lg text-slate-900 dark:text-white">Customer Identification</h4>
-                    <Select label="ID Type" value={reqData.idType} onChange={e => setReqData({...reqData, idType: e.target.value})}>
-                        <option value="NIN">National Identity Number (NIN)</option>
-                        <option value="VOTERS">Voter's Card</option>
-                        <option value="DL">Driver's License</option>
-                        <option value="PASSPORT">International Passport</option>
-                    </Select>
+                    <div className="grid grid-cols-2 gap-4">
+                        <Select label="ID Type" value={reqData.idType} onChange={e => setReqData({...reqData, idType: e.target.value})}>
+                            <option value="NIN">National Identity Number</option>
+                            <option value="VOTERS">Voter's Card</option>
+                            <option value="DL">Driver's License</option>
+                            <option value="PASSPORT">Intl. Passport</option>
+                        </Select>
+                        <Input label="ID Expiration" type="date" value={reqData.idExpiry} onChange={e => setReqData({...reqData, idExpiry: e.target.value})} />
+                    </div>
                     <Input label="ID Number" value={reqData.idNumber} onChange={e => setReqData({...reqData, idNumber: e.target.value})} icon={<Hash size={18} />} />
                     <FileUpload 
                         label="Upload ID Image" 
@@ -578,14 +628,30 @@ const Sales: React.FC = () => {
             {requestStep === 5 && (
                 <div className="space-y-4 animate-in slide-in-from-right-4">
                     <h4 className="font-bold text-lg text-slate-900 dark:text-white">Guarantor Information</h4>
-                    <Input label="Guarantor Name" value={reqData.guarantorName} onChange={e => setReqData({...reqData, guarantorName: e.target.value})} icon={<User size={18} />} />
-                    <Input label="Guarantor Phone" value={reqData.guarantorPhone} onChange={e => setReqData({...reqData, guarantorPhone: e.target.value})} type="tel" icon={<Smartphone size={18} />} />
-                    <Select label="Relationship" value={reqData.guarantorRel} onChange={e => setReqData({...reqData, guarantorRel: e.target.value})}>
-                        <option value="Family">Family Member</option>
-                        <option value="Colleague">Colleague</option>
-                        <option value="Friend">Friend</option>
-                        <option value="Community_Leader">Community Leader</option>
-                    </Select>
+                    <Input label="Full Name" value={reqData.guarantorName} onChange={e => setReqData({...reqData, guarantorName: e.target.value})} icon={<User size={18} />} />
+                    <div className="grid grid-cols-2 gap-4">
+                        <Input label="Phone Number" value={reqData.guarantorPhone} onChange={e => setReqData({...reqData, guarantorPhone: e.target.value})} type="tel" icon={<Smartphone size={18} />} />
+                        <Select label="Relationship" value={reqData.guarantorRel} onChange={e => setReqData({...reqData, guarantorRel: e.target.value})}>
+                            <option value="Family">Family Member</option>
+                            <option value="Colleague">Colleague</option>
+                            <option value="Friend">Friend</option>
+                            <option value="Community_Leader">Community Leader</option>
+                        </Select>
+                    </div>
+                    <Input label="Email Address (Optional)" type="email" value={reqData.guarantorEmail} onChange={e => setReqData({...reqData, guarantorEmail: e.target.value})} />
+                    <Input label="Full Address" value={reqData.guarantorAddress} onChange={e => setReqData({...reqData, guarantorAddress: e.target.value})} icon={<MapPin size={18} />} />
+                    
+                    <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
+                        <p className="text-xs font-bold text-slate-400 uppercase mb-2">Guarantor Verification</p>
+                        <div className="grid grid-cols-2 gap-4 mb-4">
+                            <Select label="ID Type" value={reqData.guarantorIdType} onChange={e => setReqData({...reqData, guarantorIdType: e.target.value})}>
+                                <option value="NIN">NIN</option>
+                                <option value="DL">Driver's License</option>
+                            </Select>
+                            <Input label="ID Number" value={reqData.guarantorIdNumber} onChange={e => setReqData({...reqData, guarantorIdNumber: e.target.value})} />
+                        </div>
+                        <SignaturePad label="Guarantor Signature" onChange={(sig) => setReqData({...reqData, guarantorSignature: sig})} />
+                    </div>
                 </div>
             )}
 
@@ -637,9 +703,19 @@ const Sales: React.FC = () => {
                         ></div>
                         <div className="border-t border-slate-200 dark:border-slate-700 pt-2 mt-2">
                              <div className="flex justify-between"><span className="text-slate-500">Guarantor</span><span className="font-bold">{reqData.guarantorName}</span></div>
+                             <div className="flex justify-between"><span className="text-slate-500">Guarantor ID</span><span className="font-bold">{reqData.guarantorIdNumber}</span></div>
                              <div className="flex justify-between"><span className="text-slate-500">Devices</span><span className="font-bold">{reqData.deviceSns.length} linked</span></div>
                         </div>
                     </div>
+                    {AGENT_IS_VERIFIED && (
+                        <div className="p-4 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 rounded-xl flex items-start space-x-3 border border-green-200 dark:border-green-800">
+                            <Shield size={18} className="mt-0.5" />
+                            <div className="text-xs">
+                                <p className="font-bold">Verified Agent Status</p>
+                                <p className="mt-1">This request will be auto-approved and a payment account generated immediately.</p>
+                            </div>
+                        </div>
+                    )}
                 </div>
             )}
 

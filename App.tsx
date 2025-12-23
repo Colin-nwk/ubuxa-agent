@@ -17,7 +17,9 @@ import {
   Smartphone,
   Wallet,
   Bell,
-  Layers
+  Layers,
+  Map,
+  Wrench
 } from 'lucide-react';
 import Dashboard from './components/Dashboard';
 import Customers from './components/Customers';
@@ -32,6 +34,8 @@ import Reports from './components/Reports';
 import Transactions from './components/Transactions';
 import Notifications from './components/Notifications';
 import OfflineIndicator from './components/OfflineIndicator';
+import Navigation from './components/Navigation';
+import Installer from './components/Installer';
 import { initDB } from './utils/db';
 
 // Theme Context
@@ -91,9 +95,11 @@ const App: React.FC = () => {
 
             <nav className="flex-1 p-4 space-y-2">
                <NavItem to="/" icon={<LayoutDashboard size={20} />} label="Dashboard" />
+               <NavItem to="/navigation" icon={<Map size={20} />} label="Navigation" />
                <NavItem to="/notifications" icon={<Bell size={20} />} label="Notifications" />
                <NavItem to="/customers" icon={<Users size={20} />} label="Customers" />
                <NavItem to="/sales" icon={<ShoppingCart size={20} />} label="Sales" />
+               <NavItem to="/installer" icon={<Wrench size={20} />} label="Installer" />
                <NavItem to="/transactions" icon={<Wallet size={20} />} label="Transactions" />
                <NavItem to="/inventory" icon={<Package size={20} />} label="Inventory" />
                <NavItem to="/packages" icon={<Layers size={20} />} label="Packages" />
@@ -135,12 +141,14 @@ const App: React.FC = () => {
 
           {/* Mobile Menu Overlay */}
           {isMobileMenuOpen && (
-             <div className="lg:hidden fixed inset-0 z-20 bg-slate-900/95 backdrop-blur-sm pt-20 px-6">
-                <nav className="space-y-4">
+             <div className="lg:hidden fixed inset-0 z-20 bg-slate-900/95 backdrop-blur-sm pt-20 px-6 overflow-y-auto">
+                <nav className="space-y-4 pb-10">
                    <MobileNavItem to="/" icon={<LayoutDashboard size={24} />} label="Dashboard" onClick={() => setIsMobileMenuOpen(false)} />
+                   <MobileNavItem to="/navigation" icon={<Map size={24} />} label="Navigation" onClick={() => setIsMobileMenuOpen(false)} />
                    <MobileNavItem to="/notifications" icon={<Bell size={24} />} label="Notifications" onClick={() => setIsMobileMenuOpen(false)} />
                    <MobileNavItem to="/customers" icon={<Users size={24} />} label="Customers" onClick={() => setIsMobileMenuOpen(false)} />
                    <MobileNavItem to="/sales" icon={<ShoppingCart size={24} />} label="Sales" onClick={() => setIsMobileMenuOpen(false)} />
+                   <MobileNavItem to="/installer" icon={<Wrench size={24} />} label="Installer" onClick={() => setIsMobileMenuOpen(false)} />
                    <MobileNavItem to="/transactions" icon={<Wallet size={24} />} label="Transactions" onClick={() => setIsMobileMenuOpen(false)} />
                    <MobileNavItem to="/inventory" icon={<Package size={24} />} label="Inventory" onClick={() => setIsMobileMenuOpen(false)} />
                    <MobileNavItem to="/packages" icon={<Layers size={24} />} label="Packages" onClick={() => setIsMobileMenuOpen(false)} />
@@ -175,9 +183,11 @@ const App: React.FC = () => {
             <div className="max-w-6xl mx-auto p-4 lg:p-8 w-full flex-1">
               <Routes>
                 <Route path="/" element={<Dashboard />} />
+                <Route path="/navigation" element={<Navigation />} />
                 <Route path="/notifications" element={<Notifications />} />
                 <Route path="/customers" element={<Customers />} />
                 <Route path="/sales" element={<Sales />} />
+                <Route path="/installer" element={<Installer />} />
                 <Route path="/transactions" element={<Transactions />} />
                 <Route path="/inventory" element={<Inventory />} />
                 <Route path="/packages" element={<Packages />} />

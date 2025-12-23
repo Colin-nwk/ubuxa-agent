@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
-import { Search, UserPlus, Phone, MapPin, Mail, User, ChevronRight } from 'lucide-react';
-import { PrimaryButton, BottomSheetModal, Input } from './Shared';
+import { Search, UserPlus, Phone, MapPin, Mail, User, ChevronRight, CreditCard, RefreshCw } from 'lucide-react';
+import { PrimaryButton, BottomSheetModal, Input, SecondaryButton } from './Shared';
 
 const MOCK_CUSTOMERS = [
   { id: '1', name: 'Kathleen Pfeffer', email: 'angela98@gmail.com', phone: '+234 801 234 5678', location: 'Lekki, Lagos', status: 'ACTIVE', balance: 0 },
@@ -11,6 +11,7 @@ const MOCK_CUSTOMERS = [
 const Customers: React.FC = () => {
   const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
   const [isAddCustomerOpen, setIsAddCustomerOpen] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   return (
     <div className="space-y-6 pb-20 lg:pb-0">
@@ -84,6 +85,16 @@ const Customers: React.FC = () => {
                   </div>
                </div>
 
+               {selectedCustomer.balance > 0 && (
+                   <button 
+                     onClick={() => setShowPaymentModal(true)}
+                     className="w-full py-4 bg-ubuxa-gradient text-white rounded-2xl font-bold shadow-lg shadow-primary/20 flex items-center justify-center space-x-2 animate-pulse"
+                   >
+                       <CreditCard size={20} />
+                       <span>Collect Payment (₦{selectedCustomer.balance.toLocaleString()})</span>
+                   </button>
+               )}
+
                <div className="space-y-4">
                   <div className="flex items-center space-x-4 p-4 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl shadow-sm">
                      <div className="p-2.5 bg-blue-50 dark:bg-blue-900/20 rounded-xl text-primary"><Phone size={20} /></div>
@@ -114,10 +125,36 @@ const Customers: React.FC = () => {
 
                <div className="flex space-x-3 pt-2">
                    <button className="flex-1 py-4 border border-slate-200 dark:border-slate-700 rounded-2xl font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">History</button>
-                   <button className="flex-1 py-4 bg-ubuxa-gradient text-white rounded-2xl font-bold shadow-lg shadow-primary/20 hover:scale-[1.02] transition-transform">New Sale</button>
+                   <button className="flex-1 py-4 bg-slate-900 dark:bg-slate-800 text-white rounded-2xl font-bold shadow-lg hover:scale-[1.02] transition-transform">New Sale</button>
                </div>
             </div>
          )}
+      </BottomSheetModal>
+
+      {/* Collect Payment Modal */}
+      <BottomSheetModal
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        title="Collect Payment"
+      >
+          <div className="space-y-6">
+              <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl text-center">
+                  <p className="text-xs text-slate-500 dark:text-slate-400 uppercase font-bold">Amount Due</p>
+                  <p className="text-3xl font-bold text-ubuxa-blue mt-1">₦{selectedCustomer?.balance.toLocaleString()}</p>
+              </div>
+              
+              <Input label="Payment Amount" type="number" placeholder="Enter amount" defaultValue={selectedCustomer?.balance} />
+              
+              <div className="space-y-3">
+                  <p className="text-xs font-bold text-slate-400 uppercase pl-1">Payment Method</p>
+                  <div className="grid grid-cols-2 gap-3">
+                      <button className="p-3 border-2 border-ubuxa-blue bg-blue-50 dark:bg-blue-900/30 rounded-xl font-bold text-ubuxa-blue text-sm">Cash / Transfer</button>
+                      <button className="p-3 border border-slate-200 dark:border-slate-700 rounded-xl font-bold text-slate-600 dark:text-slate-300 text-sm hover:bg-slate-50">POS / Card</button>
+                  </div>
+              </div>
+
+              <PrimaryButton onClick={() => setShowPaymentModal(false)} className="w-full">Confirm Payment</PrimaryButton>
+          </div>
       </BottomSheetModal>
 
       {/* Create Customer Bottom Sheet */}

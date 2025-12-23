@@ -5,10 +5,12 @@ import {
   TrendingUp, 
   Wallet, 
   Package, 
-  ShoppingCart
+  ShoppingCart,
+  ArrowRight
 } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { StatCard } from './Shared';
+import { StatCard, PrimaryButton } from './Shared';
+import { Link } from 'react-router-dom';
 
 const data = [
   { name: 'Mon', sales: 4000 },
@@ -21,19 +23,49 @@ const data = [
 ];
 
 const Dashboard: React.FC = () => {
+  // Simulating data state to demonstrate empty state logic
+  const hasData = true; // Set to false to see onboarding state
+
+  if (!hasData) {
+      return (
+          <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-6 animate-in fade-in zoom-in duration-500">
+              <div className="w-24 h-24 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-2">
+                  <TrendingUp size={40} className="text-slate-400" />
+              </div>
+              <div>
+                  <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Welcome to Ubuxa Agent</h2>
+                  <p className="text-slate-500 dark:text-slate-400 max-w-xs mx-auto mt-2">Your dashboard is empty. Start by registering your first customer or creating a sale.</p>
+              </div>
+              <div className="space-y-3 w-full max-w-xs">
+                  <Link to="/customers">
+                    <PrimaryButton className="w-full flex justify-between">
+                        <span>Add Customer</span>
+                        <ArrowRight size={18} />
+                    </PrimaryButton>
+                  </Link>
+                  <Link to="/sales">
+                    <button className="w-full py-4 text-slate-600 dark:text-slate-300 font-bold bg-slate-100 dark:bg-slate-800 rounded-2xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+                        Go to Sales
+                    </button>
+                  </Link>
+              </div>
+          </div>
+      )
+  }
+
   return (
     <div className="space-y-6 sm:space-y-10 animate-in fade-in duration-700">
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-8">
         <StatCard 
-          title="Total Sales" 
+          title="Total Sales (Monthly)" 
           value="₦2.25M" 
           icon={<TrendingUp className="text-primary" size={20} />} 
           trend="+12.5%" 
           positive 
         />
         <StatCard 
-          title="Active Customers" 
+          title="New Customers" 
           value="156" 
           icon={<Users className="text-primary" size={20} />} 
           trend="+4.3%" 
@@ -47,8 +79,8 @@ const Dashboard: React.FC = () => {
           positive={false} 
         />
         <StatCard 
-          title="Monthly Target" 
-          value="85%" 
+          title="Commissions" 
+          value="₦124k" 
           icon={<Wallet className="text-green-600" size={20} />} 
           trend="+5.2%" 
           positive 
