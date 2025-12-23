@@ -440,7 +440,7 @@ export const Toast: React.FC<{ title: string, message: string, type?: 'info' | '
   };
 
   return (
-    <div className="fixed top-4 right-4 left-4 sm:left-auto sm:right-8 z-[200] sm:w-full sm:max-w-sm bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl sm:rounded-[2rem] shadow-2xl p-4 sm:p-6 flex items-start space-x-4 animate-in slide-in-from-top-4 sm:slide-in-from-right-6 border-l-4 border-l-primary">
+    <div className="fixed top-4 right-4 left-4 sm:left-auto sm:right-8 z-[9999] sm:w-full sm:max-w-sm bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl sm:rounded-[2rem] shadow-2xl p-4 sm:p-6 flex items-start space-x-4 animate-in slide-in-from-top-4 sm:slide-in-from-right-6 border-l-4 border-l-primary">
       <div className="p-2 sm:p-3 bg-slate-50 dark:bg-slate-800 rounded-xl sm:rounded-2xl shadow-sm shrink-0">
         {icons[type]}
       </div>
