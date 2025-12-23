@@ -250,14 +250,18 @@ interface DataTableProps<TData> {
 
 export function DataTable<TData>({ data, columns, searchPlaceholder = "Search records..." }: DataTableProps<TData>) {
   const [globalFilter, setGlobalFilter] = useState('');
+  const [sorting, setSorting] = useState<SortingState>([]);
+  
   const table = useReactTable({
     data,
     columns,
-    state: { globalFilter },
+    state: { globalFilter, sorting },
     onGlobalFilterChange: setGlobalFilter,
+    onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    getSortedRowModel: getSortedRowModel(),
     initialState: { pagination: { pageSize: 5 } },
   });
 
@@ -284,8 +288,20 @@ export function DataTable<TData>({ data, columns, searchPlaceholder = "Search re
               {table.getHeaderGroups().map(headerGroup => (
                 <tr key={headerGroup.id}>
                   {headerGroup.headers.map(header => (
-                    <th key={header.id} className="px-6 sm:px-8 py-4 sm:py-6 text-[10px] sm:text-[11px] font-black uppercase tracking-[0.15em]">
-                      {flexRender(header.column.columnDef.header, header.getContext())}
+                    <th 
+                        key={header.id} 
+                        className="px-6 sm:px-8 py-4 sm:py-6 text-[10px] sm:text-[11px] font-black uppercase tracking-[0.15em] cursor-pointer select-none group"
+                        onClick={header.column.getToggleSortingHandler()}
+                    >
+                      <div className="flex items-center space-x-2">
+                        <span>{flexRender(header.column.columnDef.header, header.getContext())}</span>
+                        <span className="text-slate-400">
+                            {{
+                                asc: <ChevronDown size={14} className="rotate-180 transition-transform" />,
+                                desc: <ChevronDown size={14} className="transition-transform" />,
+                            }[header.column.getIsSorted() as string] ?? <ArrowUpDown size={14} className="opacity-0 group-hover:opacity-50 transition-opacity" />}
+                        </span>
+                      </div>
                     </th>
                   ))}
                 </tr>

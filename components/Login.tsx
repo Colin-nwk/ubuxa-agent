@@ -47,7 +47,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
       <div className="max-w-md w-full bg-white dark:bg-slate-900 rounded-[2rem] sm:rounded-[3rem] shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-500 border border-white/10 dark:border-slate-800">
         <div className="bg-ubuxa-gradient p-8 sm:p-14 text-center text-white relative">
           <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '20px 20px' }} />
-          <h1 className="text-4xl sm:text-5xl font-bold tracking-tighter italic uppercase mb-2 drop-shadow-lg">UBUXA</h1>
+          <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/logo-icon-DNZnSknUp8lLLR2MbsmC5X4Nf2rXnN.png" alt="UBUXA" className="h-16 sm:h-20 mx-auto mb-4 object-contain drop-shadow-lg" />
           <p className="text-[9px] sm:text-[11px] font-black uppercase tracking-[0.3em] opacity-90">Secure Agent Access</p>
         </div>
         

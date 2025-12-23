@@ -10,19 +10,20 @@ import {
   LogOut,
   Menu,
   X,
-  Zap,
   Moon,
   Sun,
   Palette,
   BarChart3,
   Smartphone,
   Wallet,
-  Bell
+  Bell,
+  Layers
 } from 'lucide-react';
 import Dashboard from './components/Dashboard';
 import Customers from './components/Customers';
 import Sales from './components/Sales';
 import Inventory from './components/Inventory';
+import Packages from './components/Packages';
 import Devices from './components/Devices';
 import SettingsView from './components/SettingsView';
 import Login from './components/Login';
@@ -85,10 +86,7 @@ const App: React.FC = () => {
           {/* Desktop Sidebar */}
           <aside className="hidden lg:flex flex-col w-64 bg-slate-900 dark:bg-slate-950 text-white border-r border-slate-800">
             <div className="p-6 flex items-center space-x-3 border-b border-slate-800">
-              <div className="w-8 h-8 bg-ubuxa-gradient rounded-lg flex items-center justify-center">
-                <Zap size={20} className="text-white" />
-              </div>
-              <span className="text-xl font-bold tracking-tight italic">UBUXA</span>
+              <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/logo-icon-DNZnSknUp8lLLR2MbsmC5X4Nf2rXnN.png" alt="UBUXA" className="h-8 w-auto object-contain" />
             </div>
 
             <nav className="flex-1 p-4 space-y-2">
@@ -98,6 +96,7 @@ const App: React.FC = () => {
                <NavItem to="/sales" icon={<ShoppingCart size={20} />} label="Sales" />
                <NavItem to="/transactions" icon={<Wallet size={20} />} label="Transactions" />
                <NavItem to="/inventory" icon={<Package size={20} />} label="Inventory" />
+               <NavItem to="/packages" icon={<Layers size={20} />} label="Packages" />
                <NavItem to="/devices" icon={<Smartphone size={20} />} label="Devices" />
                <NavItem to="/reports" icon={<BarChart3 size={20} />} label="Reports" />
                <NavItem to="/gallery" icon={<Palette size={20} />} label="UI Gallery" />
@@ -127,10 +126,7 @@ const App: React.FC = () => {
           {/* Mobile Header */}
           <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between px-4 z-30 transition-colors duration-300">
              <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-ubuxa-gradient rounded-lg flex items-center justify-center text-white">
-                   <Zap size={18} />
-                </div>
-                <span className="font-bold text-lg text-slate-900 dark:text-white italic">UBUXA</span>
+                <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/logo-icon-DNZnSknUp8lLLR2MbsmC5X4Nf2rXnN.png" alt="UBUXA" className="h-8 w-auto object-contain" />
              </div>
              <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2 text-slate-600 dark:text-slate-300">
                 {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -147,6 +143,7 @@ const App: React.FC = () => {
                    <MobileNavItem to="/sales" icon={<ShoppingCart size={24} />} label="Sales" onClick={() => setIsMobileMenuOpen(false)} />
                    <MobileNavItem to="/transactions" icon={<Wallet size={24} />} label="Transactions" onClick={() => setIsMobileMenuOpen(false)} />
                    <MobileNavItem to="/inventory" icon={<Package size={24} />} label="Inventory" onClick={() => setIsMobileMenuOpen(false)} />
+                   <MobileNavItem to="/packages" icon={<Layers size={24} />} label="Packages" onClick={() => setIsMobileMenuOpen(false)} />
                    <MobileNavItem to="/devices" icon={<Smartphone size={24} />} label="Devices" onClick={() => setIsMobileMenuOpen(false)} />
                    <MobileNavItem to="/reports" icon={<BarChart3 size={24} />} label="Reports" onClick={() => setIsMobileMenuOpen(false)} />
                    <MobileNavItem to="/gallery" icon={<Palette size={24} />} label="UI Gallery" onClick={() => setIsMobileMenuOpen(false)} />
@@ -183,6 +180,7 @@ const App: React.FC = () => {
                 <Route path="/sales" element={<Sales />} />
                 <Route path="/transactions" element={<Transactions />} />
                 <Route path="/inventory" element={<Inventory />} />
+                <Route path="/packages" element={<Packages />} />
                 <Route path="/devices" element={<Devices />} />
                 <Route path="/reports" element={<Reports />} />
                 <Route path="/gallery" element={<ComponentGallery />} />

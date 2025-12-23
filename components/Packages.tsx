@@ -1,22 +1,28 @@
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   Box, 
   Plus, 
-  Search, 
-  Filter, 
-  ChevronRight, 
-  Package, 
   TrendingUp, 
   CheckCircle2, 
-  MoreVertical,
   Layers,
   ShoppingBag,
-  ArrowRight,
-  ChevronLeft as ChevronLeftIcon,
-  ChevronRight as ChevronRightIcon
+  Edit,
+  Trash2,
+  MoreVertical,
+  Eye
 } from 'lucide-react';
-import { SideDrawer, PrimaryButton, Input, MultiSelect, StatCard } from './Shared';
+import { 
+  SideDrawer, 
+  PrimaryButton, 
+  Input, 
+  MultiSelect, 
+  StatCard, 
+  DataTable, 
+  DropdownMenu,
+  Toast 
+} from './Shared';
+import { ColumnDef } from '@tanstack/react-table';
 
 const MOCK_PACKAGES = [
   { 
@@ -75,37 +81,94 @@ const INVENTORY_OPTIONS = [
   'Charge Controller 60A'
 ];
 
-const ITEMS_PER_PAGE = 4;
-
 const Packages: React.FC = () => {
   const [isAddDrawerOpen, setIsAddDrawerOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [toast, setToast] = useState<{ title: string; message: string; type: any } | null>(null);
 
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchQuery]);
+  const columns = useMemo<ColumnDef<any>[]>(() => [
+    {
+      accessorKey: 'name',
+      header: 'Bundle Name',
+      cell: info => <span className="font-bold text-slate-900 dark:text-white">{info.getValue() as string}</span>,
+    },
+    {
+      accessorKey: 'category',
+      header: 'Category',
+      cell: info => (
+        <span className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-[10px] font-bold uppercase tracking-widest text-slate-600 dark:text-slate-400">
+          {info.getValue() as string}
+        </span>
+      ),
+    },
+    {
+        accessorKey: 'items',
+        header: 'Components',
+        cell: info => {
+            const items = info.getValue() as string[];
+            return (
+                <span className="text-xs text-slate-500 dark:text-slate-400 font-medium truncate max-w-[200px] block" title={items.join(', ')}>
+                    {items.length} Units: {items[0]}...
+                </span>
+            )
+        }
+    },
+    {
+      accessorKey: 'price',
+      header: 'Value',
+      cell: info => <span className="font-bold text-ubuxa-blue">₦{(info.getValue() as number).toLocaleString()}</span>,
+    },
+    {
+      accessorKey: 'conversions',
+      header: 'Sales',
+      cell: info => <span className="font-mono text-xs font-bold">{info.getValue() as number}</span>,
+    },
+    {
+      accessorKey: 'popular',
+      header: 'Status',
+      cell: info => info.getValue() ? (
+        <span className="flex items-center space-x-1 text-[10px] font-bold text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 px-2 py-1 rounded-full w-fit">
+            <TrendingUp size={12} />
+            <span>Trending</span>
+        </span>
+      ) : <span className="text-[10px] font-bold text-slate-400 px-2">Standard</span>,
+    },
+    {
+      id: 'actions',
+      header: 'Actions',
+      cell: () => (
+        <DropdownMenu 
+          trigger={<button className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-slate-500 dark:text-slate-400 transition-colors"><MoreVertical size={16} /></button>}
+          items={[
+            { label: 'View Details', icon: <Eye size={14} />, onClick: () => {} },
+            { label: 'Edit Bundle', icon: <Edit size={14} />, onClick: () => {} },
+            { label: 'Archive', icon: <Trash2 size={14} />, onClick: () => {}, variant: 'danger' },
+          ]}
+        />
+      ),
+    }
+  ], []);
 
-  const filteredPackages = useMemo(() => {
-    return MOCK_PACKAGES.filter(pkg => 
-      pkg.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      pkg.items.some(i => i.toLowerCase().includes(searchQuery.toLowerCase()))
-    );
-  }, [searchQuery]);
-
-  const totalPages = Math.ceil(filteredPackages.length / ITEMS_PER_PAGE);
-  const paginatedPackages = useMemo(() => {
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    return filteredPackages.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-  }, [filteredPackages, currentPage]);
+  const handleSave = () => {
+      setIsAddDrawerOpen(false);
+      setToast({ title: 'Bundle Created', message: 'New system package has been successfully defined.', type: 'success' });
+  };
 
   return (
-    <div className="space-y-10 animate-in fade-in duration-500 pb-20 lg:pb-12">
+    <div className="space-y-8 animate-in fade-in duration-500 pb-20 lg:pb-12">
+      {toast && (
+        <Toast 
+          title={toast.title} 
+          message={toast.message} 
+          type={toast.type} 
+          onClose={() => setToast(null)} 
+        />
+      )}
+
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h2 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">System Bundles</h2>
-          <p className="text-slate-500 dark:text-slate-400 font-medium text-sm mt-1">Configure curated equipment sets for accelerated sales</p>
+          <h2 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">System Packages</h2>
+          <p className="text-slate-500 dark:text-slate-400 font-medium text-sm mt-1">Manage standard equipment configurations and pricing</p>
         </div>
         <PrimaryButton onClick={() => setIsAddDrawerOpen(true)} icon={<Plus size={22} strokeWidth={3} />}>
           New Bundle Definition
@@ -132,94 +195,11 @@ const Packages: React.FC = () => {
         />
       </div>
 
-      <div className="bg-white dark:bg-slate-900 p-6 rounded-[2.5rem] shadow-sm border border-slate-100 dark:border-slate-800 flex flex-col md:flex-row gap-6 items-center">
-        <div className="relative flex-1 w-full group">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-ubuxa-blue transition-colors" size={20} />
-          <input 
-            type="text" 
-            placeholder="Search by bundle name or hardware component..." 
-            className="w-full pl-14 pr-6 py-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-ubuxa-blue transition-all"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
-        <button className="px-8 py-4 bg-slate-900 dark:bg-slate-800 text-white rounded-2xl text-xs font-black uppercase tracking-widest flex items-center space-x-3 hover:bg-slate-800 dark:hover:bg-slate-700 transition-colors shadow-lg">
-          <Filter size={20} />
-          <span>Category Map</span>
-        </button>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-        {paginatedPackages.map((pkg) => (
-          <div key={pkg.id} className="bg-white dark:bg-slate-900 rounded-[3.5rem] border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden hover:border-ubuxa-blue dark:hover:border-ubuxa-blue hover:shadow-2xl hover:-translate-y-1 transition-all duration-500 group">
-            <div className="p-10 flex flex-col h-full">
-              <div className="flex justify-between items-start mb-8">
-                <div className="flex-1">
-                   <div className="flex items-center space-x-3 mb-4">
-                     <span className="px-3 py-1 bg-slate-900 dark:bg-slate-700 text-white rounded-xl text-[9px] font-black uppercase tracking-[0.2em]">{pkg.category}</span>
-                     {pkg.popular && (
-                       <span className="px-3 py-1 bg-blue-50 dark:bg-blue-900/30 text-ubuxa-blue border border-blue-100 dark:border-blue-900/50 rounded-xl text-[9px] font-black uppercase tracking-[0.2em] flex items-center shadow-sm">
-                         <CheckCircle2 size={12} className="mr-1.5" />
-                         Trending
-                       </span>
-                     )}
-                   </div>
-                   <h3 className="text-3xl font-bold text-slate-900 dark:text-white group-hover:text-ubuxa-blue transition-colors tracking-tight italic">{pkg.name}</h3>
-                </div>
-                <button className="p-3 text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors bg-slate-50 dark:bg-slate-800 rounded-2xl">
-                  <MoreVertical size={24} />
-                </button>
-              </div>
-
-              <div className="flex-1 space-y-4 mb-10">
-                <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.25em] pl-2">System Components</p>
-                <div className="grid grid-cols-1 gap-3">
-                  {pkg.items.map((item, idx) => (
-                    <div key={idx} className="flex items-center text-sm font-bold text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-700 group-hover:bg-white dark:group-hover:bg-slate-900 group-hover:border-blue-100 dark:group-hover:border-blue-900 transition-all">
-                      <div className="w-2 h-2 bg-ubuxa-blue rounded-full mr-4 shadow-blue-500/20" />
-                      {item}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="pt-8 border-t border-slate-50 dark:border-slate-800 flex items-center justify-between mt-auto">
-                <div>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5 opacity-70">Package Value</p>
-                  <p className="text-3xl font-black text-slate-900 dark:text-white tracking-tighter italic">₦{pkg.price.toLocaleString()}</p>
-                </div>
-                <button className="w-16 h-16 bg-ubuxa-gradient text-white rounded-[1.5rem] flex items-center justify-center shadow-xl shadow-blue-500/20 group-hover:scale-110 active:scale-90 transition-all">
-                  <ArrowRight size={32} />
-                </button>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {totalPages > 1 && (
-        <div className="px-10 py-6 bg-white dark:bg-slate-900 rounded-[3rem] border border-slate-100 dark:border-slate-800 flex items-center justify-between shadow-sm">
-          <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest">
-            Page {currentPage} of {totalPages}
-          </span>
-          <div className="flex space-x-3">
-            <button 
-              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-              disabled={currentPage === 1}
-              className="w-12 h-12 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl flex items-center justify-center text-slate-400 hover:text-ubuxa-blue hover:border-ubuxa-blue disabled:opacity-30 transition-all shadow-sm active:scale-90"
-            >
-              <ChevronLeftIcon size={22} />
-            </button>
-            <button 
-              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-              disabled={currentPage === totalPages}
-              className="w-12 h-12 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl flex items-center justify-center text-slate-400 hover:text-ubuxa-blue hover:border-ubuxa-blue disabled:opacity-30 transition-all shadow-sm active:scale-90"
-            >
-              <ChevronRightIcon size={22} />
-            </button>
-          </div>
-        </div>
-      )}
+      <DataTable 
+        data={MOCK_PACKAGES} 
+        columns={columns} 
+        searchPlaceholder="Search bundles by name or component..." 
+      />
 
       <SideDrawer
         isOpen={isAddDrawerOpen}
@@ -228,7 +208,7 @@ const Packages: React.FC = () => {
         subtitle="Initialize a serialized equipment bundle for deployment."
         maxWidth="max-w-xl"
         footer={
-          <PrimaryButton className="w-full py-5 text-lg" onClick={() => setIsAddDrawerOpen(false)}>
+          <PrimaryButton className="w-full py-5 text-lg" onClick={handleSave}>
             Initialize Bundle
           </PrimaryButton>
         }
@@ -256,11 +236,11 @@ const Packages: React.FC = () => {
              <div className="space-y-6">
                <div className="flex items-center justify-between">
                  <span className="text-sm font-bold text-slate-600 dark:text-slate-300">Highlight as Trending</span>
-                 <input type="checkbox" className="w-6 h-6 rounded-lg accent-ubuxa-blue border-slate-300" />
+                 <input type="checkbox" className="w-6 h-6 rounded-lg accent-ubuxa-blue border-slate-300 cursor-pointer" />
                </div>
                <div className="flex items-center justify-between">
                  <span className="text-sm font-bold text-slate-600 dark:text-slate-300">Enable Finance Protocol</span>
-                 <input type="checkbox" defaultChecked className="w-6 h-6 rounded-lg accent-ubuxa-blue border-slate-300" />
+                 <input type="checkbox" defaultChecked className="w-6 h-6 rounded-lg accent-ubuxa-blue border-slate-300 cursor-pointer" />
                </div>
              </div>
           </div>
