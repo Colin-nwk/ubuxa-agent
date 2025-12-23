@@ -17,6 +17,7 @@ import {
   List,
   ChevronLeft as ChevronLeftIcon,
   ChevronRight as ChevronRightIcon,
+  ChevronRight,
   Hash,
   Clock,
   FileText,
@@ -480,8 +481,8 @@ const Sales: React.FC = () => {
           <div className="px-6 py-4 sm:px-10 sm:py-6 bg-slate-50 dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
             <span className="text-[9px] sm:text-[11px] font-black text-slate-400 uppercase tracking-widest">Page {currentPage} of {salesTotalPages}</span>
             <div className="flex space-x-2">
-              <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="w-10 h-10 sm:w-12 sm:h-12 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl sm:rounded-2xl flex items-center justify-center text-slate-400 disabled:opacity-30 hover:border-ubuxa-blue active:scale-90 transition-all shadow-sm"><ChevronLeftIcon size={18} /></button>
-              <button onClick={() => setCurrentPage(p => Math.min(salesTotalPages, p + 1))} disabled={currentPage === salesTotalPages} className="w-10 h-10 sm:w-12 sm:h-12 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl sm:rounded-2xl flex items-center justify-center text-slate-400 disabled:opacity-30 hover:border-ubuxa-blue active:scale-90 transition-all shadow-sm"><ChevronRightIcon size={18} /></button>
+              <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="w-10 h-10 sm:w-12 sm:h-12 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl sm:rounded-2xl flex items-center justify-center text-slate-400 disabled:opacity-30 hover:border-ubuxa-blue active:scale-90 transition-all shadow-sm"><ChevronLeft size={18} /></button>
+              <button onClick={() => setCurrentPage(p => Math.min(salesTotalPages, p + 1))} disabled={currentPage === salesTotalPages} className="w-10 h-10 sm:w-12 sm:h-12 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl sm:rounded-2xl flex items-center justify-center text-slate-400 disabled:opacity-30 hover:border-ubuxa-blue active:scale-90 transition-all shadow-sm"><ChevronRight size={18} /></button>
             </div>
           </div>
         )}
@@ -567,7 +568,10 @@ const Sales: React.FC = () => {
                         <option value="PASSPORT">International Passport</option>
                     </Select>
                     <Input label="ID Number" value={reqData.idNumber} onChange={e => setReqData({...reqData, idNumber: e.target.value})} icon={<Hash size={18} />} />
-                    <FileUpload label="Upload ID Image" onChange={(f) => setReqData({...reqData, idImage: f})} />
+                    <FileUpload 
+                        label="Upload ID Image" 
+                        onChange={(files) => setReqData({...reqData, idImage: files[0]})} 
+                    />
                 </div>
             )}
 
@@ -629,7 +633,8 @@ const Sales: React.FC = () => {
                         <div className="flex justify-between"><span className="text-slate-500">Customer</span><span className="font-bold">{reqData.firstName} {reqData.lastName}</span></div>
                         <div className="flex justify-between"><span className="text-slate-500">Package</span><span className="font-bold">{reqData.packageName}</span></div>
                         <div className="flex justify-between"><span className="text-slate-500">Plan</span><span className="font-bold">{reqData.paymentType}</span></div>
-                        <div className="flex justify-between"><span className="text-slate-500">Total Value</span><span className="font-bold text-ubuxa-blue">₦{(reqData.packagePrice + Number(reqData.installFee) + Number(reqData.accessoriesCost)).toLocaleString()}</span></div>
+                        <div className="flex justify-between"><span className="text-slate-500">Total Value</span><span className="font-bold text-ubuxa-blue">₦{(reqData.packagePrice + Number(reqData.installFee) + Number(reqData.accessoriesCost)).toLocaleString()}</span
+                        ></div>
                         <div className="border-t border-slate-200 dark:border-slate-700 pt-2 mt-2">
                              <div className="flex justify-between"><span className="text-slate-500">Guarantor</span><span className="font-bold">{reqData.guarantorName}</span></div>
                              <div className="flex justify-between"><span className="text-slate-500">Devices</span><span className="font-bold">{reqData.deviceSns.length} linked</span></div>
@@ -822,121 +827,112 @@ const Sales: React.FC = () => {
                             icon={<MapPin size={18} />} 
                             value={installAddress}
                             onChange={(e) => setInstallAddress(e.target.value)}
-                            placeholder="Enter street address"
                         />
                         <Input 
-                            label="Preferred Date" 
+                            label="Installation Date" 
                             type="date"
                             icon={<Calendar size={18} />} 
                             value={installDate}
                             onChange={(e) => setInstallDate(e.target.value)}
                         />
-                        <div className="bg-slate-50 dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700">
-                            <div className="flex items-start space-x-3">
-                                <Clock className="text-ubuxa-blue mt-0.5" size={18} />
-                                <div>
-                                    <h5 className="font-bold text-slate-900 dark:text-white text-sm">Deployment SLA</h5>
-                                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
-                                        Standard installation takes 4-6 hours. Please ensure the site is accessible during this window.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                   </div>
                 )}
 
-                {/* Step 4: Hardware Assignment */}
+                {/* Step 4: Device Linking */}
                 {wizardStep === 4 && (
                   <div className="space-y-6 sm:space-y-8 animate-in slide-in-from-right-4 duration-300">
-                    <div className="text-center">
-                      <h4 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">Hardware Assignment</h4>
-                      <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium">Scan or select device units</p>
-                    </div>
-                    <div className="space-y-3">
-                      {filteredDevices.map(dev => (
-                        <button 
-                          key={dev.sn} 
-                          onClick={() => assignedDevices.includes(dev.sn) ? setAssignedDevices(assignedDevices.filter(s => s !== dev.sn)) : setAssignedDevices([...assignedDevices, dev.sn])} 
-                          className={`w-full p-4 sm:p-6 rounded-[1.5rem] sm:rounded-[2.5rem] border-2 text-left transition-all flex items-center justify-between group active:scale-[0.98] ${assignedDevices.includes(dev.sn) ? 'border-ubuxa-blue bg-blue-50 dark:bg-blue-900/30 shadow-xl' : 'border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-800 hover:border-ubuxa-blue/50'}`}
-                        >
-                          <div className="flex items-center space-x-4 sm:space-x-5 min-w-0">
-                            <div className={`w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl flex items-center justify-center transition-colors shrink-0 ${assignedDevices.includes(dev.sn) ? 'bg-ubuxa-blue text-white' : 'bg-slate-50 dark:bg-slate-700 text-slate-400'}`}><Smartphone size={20} /></div>
-                            <div className="min-w-0">
-                               <p className="font-mono font-black text-slate-900 dark:text-white text-sm sm:text-[15px] truncate">{dev.sn}</p>
-                               <p className="text-[9px] sm:text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5 truncate">{dev.model}</p>
-                            </div>
-                          </div>
-                          <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-lg sm:rounded-xl border-2 flex items-center justify-center transition-all shrink-0 ${assignedDevices.includes(dev.sn) ? 'bg-ubuxa-blue border-ubuxa-blue shadow-lg' : 'border-slate-200 dark:border-slate-700'}`}>
-                             {assignedDevices.includes(dev.sn) && <Check size={14} className="text-white" strokeWidth={4} />}
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Step 5: Digital Contract */}
-                {wizardStep === 5 && (
-                  <div className="space-y-6 sm:space-y-8 animate-in slide-in-from-right-4 duration-300">
-                    <div className="text-center">
-                      <h4 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">Digital Contract</h4>
-                      <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium">Customer acknowledgement of terms</p>
-                    </div>
-
-                    <div className="space-y-4">
-                        <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl text-xs text-slate-600 dark:text-slate-300 leading-relaxed border border-slate-200 dark:border-slate-700 h-32 overflow-y-auto">
-                            <p><strong>1. Payment Obligations:</strong> The customer agrees to the total valuation of ₦{totalPrice.toLocaleString()}. For financed plans, monthly remittances must be made by the 5th of each month.</p>
-                            <p className="mt-2"><strong>2. Ownership:</strong> Title to the equipment remains with UBUXA until full payment is completed. Any attempt to tamper with the device lock will void warranty.</p>
-                            <p className="mt-2"><strong>3. Service:</strong> UBUXA provides 1 year of free maintenance. Physical damage is not covered.</p>
-                        </div>
-                        
-                        <div className="flex items-center space-x-2 text-xs font-bold text-slate-900 dark:text-white">
-                            <PenTool size={16} className="text-ubuxa-blue" />
-                            <span>Customer Signature</span>
-                        </div>
-                        <SignaturePad 
-                            onChange={(sig) => setSignature(sig)} 
-                        />
-                        {signature && (
-                            <div className="flex items-center space-x-2 text-green-600 dark:text-green-400 bg-green-50 dark:bg-green-900/20 p-2 rounded-lg text-xs font-bold justify-center">
-                                <CheckCircle2 size={14} />
-                                <span>Signature Captured</span>
-                            </div>
-                        )}
-                    </div>
-                  </div>
-                )}
-
-                {/* Step 6: Final Valuation */}
-                {wizardStep === 6 && (
-                  <div className="space-y-6 sm:space-y-8 animate-in slide-in-from-right-4 duration-300">
-                    <div className="bg-ubuxa-gradient p-8 sm:p-12 rounded-[2rem] sm:rounded-[3.5rem] text-white text-center shadow-2xl relative overflow-hidden">
-                      <div className="absolute top-0 left-0 w-full h-full opacity-10 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '30px 30px' }} />
-                      <p className="font-black uppercase tracking-[0.2em] text-[9px] sm:text-[11px] mb-3 sm:mb-4 opacity-80">Final Valuation</p>
-                      <h4 className="text-4xl sm:text-5xl font-bold italic tracking-tighter">₦{totalPrice.toLocaleString()}</h4>
+                     <div className="text-center">
+                      <h4 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">Link Devices</h4>
+                      <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium">Scan or select hardware serial numbers</p>
                     </div>
                     
-                    <div className="space-y-4">
-                      <div className="bg-white dark:bg-slate-800 p-6 sm:p-8 rounded-[1.5rem] sm:rounded-[3rem] space-y-4 sm:space-y-6 shadow-sm border border-slate-100 dark:border-slate-700">
-                         <div className="flex justify-between items-center"><span className="text-[10px] sm:text-[11px] font-black text-slate-400 uppercase tracking-widest">Client</span><span className="text-slate-900 dark:text-white font-bold text-sm">{selectedCustomer?.name}</span></div>
-                         <div className="flex justify-between items-start border-t border-slate-100 dark:border-slate-700 pt-4 sm:pt-6"><span className="text-[10px] sm:text-[11px] font-black text-slate-400 uppercase tracking-widest">Config</span><span className="text-slate-900 dark:text-white font-bold text-right max-w-[150px] sm:max-w-[200px] text-xs sm:text-sm line-clamp-2">{selectionMode === 'PACKAGE' ? selectedPackage?.name : cart.map(i => `${i.quantity}x ${i.name}`).join(', ')}</span></div>
-                         <div className="flex justify-between items-center border-t border-slate-100 dark:border-slate-700 pt-4 sm:pt-6">
-                            <span className="text-[10px] sm:text-[11px] font-black text-slate-400 uppercase tracking-widest">Install</span>
-                            <div className="text-right">
-                                <span className="block text-slate-900 dark:text-white font-bold text-sm">{installDate}</span>
-                                <span className="block text-xs text-slate-500 truncate max-w-[150px]">{installAddress}</span>
-                            </div>
-                         </div>
-                      </div>
+                    <div className="relative group">
+                      <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                      <input 
+                        type="text" 
+                        placeholder="Scan or type serial..." 
+                        className="w-full pl-12 pr-6 py-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl sm:rounded-[1.5rem] focus:ring-2 focus:ring-ubuxa-blue focus:outline-none shadow-sm transition-all text-sm text-slate-900 dark:text-white"
+                        value={devSearch}
+                        onChange={(e) => setDevSearch(e.target.value)}
+                      />
                     </div>
 
-                    <div className="space-y-3">
-                       <p className="text-[10px] sm:text-[11px] font-black text-slate-400 uppercase tracking-widest pl-3">Payment Protocol</p>
-                       <div className="flex gap-2 sm:gap-4 p-1.5 sm:p-2 bg-slate-100 dark:bg-slate-800 rounded-xl sm:rounded-[2rem] border border-slate-200 dark:border-slate-700">
-                         <button onClick={() => setPaymentPlan('OUTRIGHT')} className={`flex-1 py-3 sm:py-4 rounded-lg sm:rounded-[1.5rem] font-bold text-[10px] sm:text-xs uppercase tracking-widest transition-all ${paymentPlan === 'OUTRIGHT' ? 'bg-white dark:bg-slate-700 text-ubuxa-blue dark:text-white shadow-lg' : 'text-slate-500 dark:text-slate-400'}`}>Outright</button>
-                         <button onClick={() => setPaymentPlan('FINANCED')} className={`flex-1 py-3 sm:py-4 rounded-lg sm:rounded-[1.5rem] font-bold text-[10px] sm:text-xs uppercase tracking-widest transition-all ${paymentPlan === 'FINANCED' ? 'bg-white dark:bg-slate-700 text-ubuxa-blue dark:text-white shadow-lg' : 'text-slate-500 dark:text-slate-400'}`}>Financed</button>
-                       </div>
+                    <div className="space-y-3 max-h-60 overflow-y-auto pr-2">
+                        {filteredDevices.map(device => {
+                            const isSelected = assignedDevices.includes(device.sn);
+                            return (
+                                <div 
+                                    key={device.id} 
+                                    onClick={() => {
+                                        if (isSelected) setAssignedDevices(prev => prev.filter(sn => sn !== device.sn));
+                                        else setAssignedDevices(prev => [...prev, device.sn]);
+                                    }}
+                                    className={`p-4 rounded-xl border-2 cursor-pointer flex items-center justify-between transition-all ${isSelected ? 'border-ubuxa-blue bg-blue-50 dark:bg-blue-900/30' : 'border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-800'}`}
+                                >
+                                    <div className="flex items-center space-x-3">
+                                        <Smartphone size={20} className={isSelected ? 'text-ubuxa-blue' : 'text-slate-400'} />
+                                        <div>
+                                            <p className="font-bold text-sm text-slate-900 dark:text-white">{device.sn}</p>
+                                            <p className="text-[10px] text-slate-500">{device.model}</p>
+                                        </div>
+                                    </div>
+                                    {isSelected && <CheckCircle2 size={18} className="text-ubuxa-blue" />}
+                                </div>
+                            );
+                        })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Step 5: Contract & Signature */}
+                {wizardStep === 5 && (
+                  <div className="space-y-6 sm:space-y-8 animate-in slide-in-from-right-4 duration-300">
+                     <div className="text-center">
+                      <h4 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">Customer Agreement</h4>
+                      <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium">Sign to authorize this transaction</p>
+                    </div>
+
+                    <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl text-xs text-slate-600 dark:text-slate-300 leading-relaxed border border-slate-200 dark:border-slate-700">
+                        I, <span className="font-bold">{selectedCustomer?.name}</span>, acknowledge receipt of the items listed and agree to the payment terms defined. I understand that failure to remit payments may result in remote deactivation of the solar assets.
+                    </div>
+
+                    <SignaturePad label="Customer Signature" onChange={setSignature} />
+                  </div>
+                )}
+
+                {/* Step 6: Confirmation */}
+                {wizardStep === 6 && (
+                  <div className="space-y-6 sm:space-y-8 animate-in slide-in-from-right-4 duration-300">
+                     <div className="text-center">
+                      <h4 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">Review & Confirm</h4>
+                      <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium">Please verify all details before submitting</p>
+                    </div>
+
+                    <div className="bg-white dark:bg-slate-800 p-6 rounded-[2rem] border border-slate-100 dark:border-slate-700 shadow-sm space-y-4">
+                        <div className="flex justify-between items-center pb-4 border-b border-slate-100 dark:border-slate-700">
+                            <span className="text-slate-500 text-sm">Customer</span>
+                            <span className="font-bold text-slate-900 dark:text-white">{selectedCustomer?.name}</span>
+                        </div>
+                        <div className="flex justify-between items-center pb-4 border-b border-slate-100 dark:border-slate-700">
+                            <span className="text-slate-500 text-sm">Product</span>
+                            <span className="font-bold text-slate-900 dark:text-white">{selectionMode === 'PACKAGE' ? selectedPackage?.name : 'Custom Bundle'}</span>
+                        </div>
+                        <div className="flex justify-between items-center pb-4 border-b border-slate-100 dark:border-slate-700">
+                            <span className="text-slate-500 text-sm">Total Amount</span>
+                            <span className="font-bold text-ubuxa-blue text-lg">₦{totalPrice.toLocaleString()}</span>
+                        </div>
+                        <div className="flex justify-between items-center pb-4 border-b border-slate-100 dark:border-slate-700">
+                            <span className="text-slate-500 text-sm">Payment Plan</span>
+                            <span className="font-bold text-slate-900 dark:text-white">{paymentPlan}</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                            <span className="text-slate-500 text-sm">Installation</span>
+                            <div className="text-right">
+                                <p className="font-bold text-slate-900 dark:text-white text-sm">{installDate}</p>
+                                <p className="text-xs text-slate-500 truncate max-w-[150px]">{installAddress}</p>
+                            </div>
+                        </div>
                     </div>
                   </div>
                 )}
@@ -945,112 +941,19 @@ const Sales: React.FC = () => {
           </div>
 
           {!isSuccess && (
-            <div className="p-6 sm:p-10 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shrink-0">
-              <button 
-                disabled={!isStepValid()}
-                onClick={handleNext}
-                className="w-full bg-slate-900 dark:bg-slate-800 text-white py-4 sm:py-5 rounded-xl sm:rounded-2xl font-bold text-base sm:text-lg shadow-xl disabled:opacity-40 transition-all active:scale-95"
-              >
-                {wizardStep === 6 ? 'Confirm & Deploy' : 'Continue'}
-              </button>
+            <div className="p-5 sm:p-10 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-950 shrink-0">
+               <PrimaryButton 
+                 onClick={handleNext} 
+                 disabled={!isStepValid()} 
+                 className="w-full shadow-xl"
+                 icon={wizardStep === 6 ? <CheckCircle2 /> : <ChevronRight />}
+               >
+                 {wizardStep === 6 ? 'Complete Transaction' : 'Continue'}
+               </PrimaryButton>
             </div>
           )}
         </div>
       </div>
-
-      <BottomSheetModal
-        isOpen={!!selectedSaleDetails}
-        onClose={() => setSelectedSaleDetails(null)}
-        title={selectedSaleDetails?.status === 'REQUEST' ? 'Request Details' : 'Transaction Details'}
-      >
-        {selectedSaleDetails && (
-          <div className="space-y-6">
-             {/* Status & Amount Header */}
-             <div className={`p-6 rounded-2xl flex items-center justify-between ${
-                 selectedSaleDetails.status === 'COMPLETED' ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400' : 
-                 selectedSaleDetails.status === 'REQUEST' ? 'bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400' :
-                 'bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400'
-             }`}>
-                <div className="flex items-center space-x-3">
-                   <div className={`p-2 rounded-full ${
-                       selectedSaleDetails.status === 'COMPLETED' ? 'bg-green-200 dark:bg-green-800' : 
-                       selectedSaleDetails.status === 'REQUEST' ? 'bg-purple-200 dark:bg-purple-800' :
-                       'bg-amber-200 dark:bg-amber-800'
-                   }`}>
-                      {selectedSaleDetails.status === 'COMPLETED' ? <CheckCircle2 size={20} /> : selectedSaleDetails.status === 'REQUEST' ? <FileText size={20} /> : <Clock size={20} />} 
-                   </div>
-                   <div>
-                      <p className="font-bold text-sm">Status</p>
-                      <p className="text-xs font-black uppercase tracking-widest">{selectedSaleDetails.status === 'REQUEST' ? 'PENDING APPROVAL' : selectedSaleDetails.status}</p>
-                   </div>
-                </div>
-                <div className="text-right">
-                   <p className="text-sm font-medium opacity-80">Total Amount</p>
-                   <p className="text-2xl font-bold tracking-tight">₦{(selectedSaleDetails.amount || selectedSaleDetails.packagePrice).toLocaleString()}</p>
-                </div>
-             </div>
-
-             {/* Customer Info */}
-             <div className="p-4 border border-slate-100 dark:border-slate-800 rounded-2xl flex items-center justify-between bg-white dark:bg-slate-900">
-                <div className="flex items-center space-x-3">
-                   <div className="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-500">
-                      <User size={20} />
-                   </div>
-                   <div>
-                      <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Customer</p>
-                      <p className="font-bold text-slate-900 dark:text-white">{selectedSaleDetails.customer || (selectedSaleDetails.firstName + ' ' + selectedSaleDetails.lastName)}</p>
-                   </div>
-                </div>
-                <button className="text-xs font-bold text-ubuxa-blue">View Profile</button>
-             </div>
-
-             {/* Product Info */}
-             <div className="space-y-3">
-                <p className="text-xs text-slate-400 font-bold uppercase tracking-widest pl-2">Purchase Details</p>
-                <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl space-y-3">
-                   <div className="flex justify-between">
-                      <span className="text-sm text-slate-600 dark:text-slate-400">Product</span>
-                      <span className="text-sm font-bold text-slate-900 dark:text-white">{selectedSaleDetails.product || selectedSaleDetails.packageName}</span>
-                   </div>
-                   <div className="flex justify-between">
-                      <span className="text-sm text-slate-600 dark:text-slate-400">Date</span>
-                      <span className="text-sm font-bold text-slate-900 dark:text-white">{selectedSaleDetails.date}</span>
-                   </div>
-                   <div className="flex justify-between">
-                      <span className="text-sm text-slate-600 dark:text-slate-400">Payment Plan</span>
-                      <span className="text-sm font-bold text-slate-900 dark:text-white">{selectedSaleDetails.paymentType || selectedSaleDetails.paymentPlan}</span>
-                   </div>
-                   {selectedSaleDetails.status === 'REQUEST' && (
-                       <div className="flex justify-between">
-                            <span className="text-sm text-slate-600 dark:text-slate-400">Guarantor</span>
-                            <span className="text-sm font-bold text-slate-900 dark:text-white">{selectedSaleDetails.guarantorName}</span>
-                       </div>
-                   )}
-                </div>
-             </div>
-
-             {/* Associated Devices (Handling both arrays for different structures) */}
-             {(selectedSaleDetails.devices || selectedSaleDetails.deviceSns) && (selectedSaleDetails.devices?.length > 0 || selectedSaleDetails.deviceSns?.length > 0) && (
-               <div className="space-y-3">
-                  <p className="text-xs text-slate-400 font-bold uppercase tracking-widest pl-2">Linked Hardware</p>
-                  <div className="space-y-2">
-                     {(selectedSaleDetails.devices || selectedSaleDetails.deviceSns).map((sn: string) => (
-                        <div key={sn} className="flex items-center space-x-3 p-3 border border-slate-100 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900">
-                           <Smartphone size={16} className="text-slate-400" />
-                           <span className="text-sm font-mono font-bold text-slate-700 dark:text-slate-300">{sn}</span>
-                        </div>
-                     ))}
-                  </div>
-               </div>
-             )}
-              
-             <div className="grid grid-cols-2 gap-3 pt-2">
-                <SecondaryButton icon={<FileText size={16} />}>Receipt</SecondaryButton>
-                <PrimaryButton>Support</PrimaryButton>
-             </div>
-          </div>
-        )}
-      </BottomSheetModal>
     </div>
   );
 };
