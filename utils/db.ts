@@ -118,6 +118,30 @@ export const addItemToStore = async (storeName: string, item: any) => {
   });
 };
 
+export const updateItemInStore = async (storeName: string, item: any) => {
+  const db = await initDB();
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([storeName], 'readwrite');
+    const store = transaction.objectStore(storeName);
+    const request = store.put(item); // put updates if key exists
+
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+};
+
+export const deleteFromStore = async (storeName: string, key: string) => {
+  const db = await initDB();
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([storeName], 'readwrite');
+    const store = transaction.objectStore(storeName);
+    const request = store.delete(key);
+
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+};
+
 export const addToSyncQueue = async (action: { type: string, payload: any }) => {
   const db = await initDB();
   return new Promise((resolve, reject) => {

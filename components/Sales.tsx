@@ -27,10 +27,16 @@ import {
   Shield,
   Users,
   Truck,
-  CreditCard
+  CreditCard,
+  RefreshCw,
+  Edit,
+  Trash2,
+  Send,
+  Archive,
+  CloudOff
 } from 'lucide-react';
-import { BottomSheetModal, PrimaryButton, SecondaryButton, Input, SignaturePad, Select, FileUpload } from './Shared';
-import { getAllFromStore, addItemToStore, addToSyncQueue } from '../utils/db';
+import { BottomSheetModal, PrimaryButton, SecondaryButton, Input, SignaturePad, Select, FileUpload, Tabs, Toast } from './Shared';
+import { getAllFromStore, addItemToStore, addToSyncQueue, updateItemInStore, deleteFromStore } from '../utils/db';
 
 const ITEMS_PER_PAGE = 5;
 
@@ -41,6 +47,12 @@ const Sales: React.FC = () => {
   const [dbPackages, setDbPackages] = useState<any[]>([]);
   const [dbDevices, setDbDevices] = useState<any[]>([]);
   const [dbSales, setDbSales] = useState<any[]>([]);
+  const [dbSalesRequests, setDbSalesRequests] = useState<any[]>([]);
+
+  // ---- View State ----
+  const [activeView, setActiveView] = useState('history'); // 'history' | 'requests'
+  const [requestTab, setRequestTab] = useState('sent'); // 'sent' | 'awaiting'
+  const [toast, setToast] = useState<{ title: string; message: string; type: any } | null>(null);
 
   // ---- Existing Wizard State ----
   const [showDrawer, setShowDrawer] = useState(false);
@@ -68,6 +80,7 @@ const Sales: React.FC = () => {
 
   // ---- New Sales Request State ----
   const [showRequestSheet, setShowRequestSheet] = useState(false);
+  const [editingRequestId, setEditingRequestId] = useState<string | null>(null);
   const [requestStep, setRequestStep] = useState(1);
   const [reqData, setReqData] = useState({
     firstName: '', lastName: '', phone: '', email: '', address: '',
@@ -92,17 +105,13 @@ const Sales: React.FC = () => {
                 getAllFromStore('sales'),
                 getAllFromStore('sales_requests')
             ]);
-            // Combine sales and requests for display, marking requests clearly
-            const allTransactions = [
-                ...s, 
-                ...reqs.map((r: any) => ({ ...r, status: 'REQUEST', product: r.packageName, amount: r.packagePrice, customer: `${r.firstName} ${r.lastName}` }))
-            ];
             
             setDbCustomers(c);
             setDbInventory(i);
             setDbPackages(p);
             setDbDevices(d);
-            setDbSales(allTransactions.sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime()));
+            setDbSales(s.sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime()));
+            setDbSalesRequests(reqs.sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime()));
         } catch (e) {
             console.error("Failed to load DB data", e);
         }
@@ -128,6 +137,7 @@ const Sales: React.FC = () => {
 
   const resetRequestFlow = () => {
       setShowRequestSheet(false);
+      setEditingRequestId(null);
       setRequestStep(1);
       setReqData({
         firstName: '', lastName: '', phone: '', email: '', address: '',
@@ -163,18 +173,59 @@ const Sales: React.FC = () => {
   };
 
   const completeRequest = async () => {
+      const isOffline = !navigator.onLine;
       const newRequest = {
-          id: `REQ-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`,
+          id: editingRequestId || `REQ-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`,
           ...reqData,
           date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-          status: 'PENDING_APPROVAL'
+          status: 'PENDING_APPROVAL',
+          syncStatus: isOffline ? 'PENDING_SYNC' : 'SYNCED',
+          lastModified: Date.now()
       };
       
-      await addItemToStore('sales_requests', newRequest);
-      if (!navigator.onLine) await addToSyncQueue({ type: 'CREATE_REQUEST', payload: newRequest });
+      if (editingRequestId) {
+          await updateItemInStore('sales_requests', newRequest);
+          setToast({ title: 'Request Updated', message: 'Changes have been saved successfully.', type: 'success' });
+      } else {
+          await addItemToStore('sales_requests', newRequest);
+      }
+
+      if (isOffline) {
+          await addToSyncQueue({ type: 'CREATE_REQUEST', payload: newRequest });
+      }
       
       resetRequestFlow();
-      setIsSuccess(true); // Reuse success state/UI or create a specific toast
+      setIsSuccess(true);
+  };
+
+  const handleRetrySync = async (req: any) => {
+      // Simulate sync
+      const updated = { ...req, syncStatus: 'SYNCED', lastModified: Date.now() };
+      await updateItemInStore('sales_requests', updated);
+      // In a real app, we would remove from sync_queue here too
+      setIsSuccess(prev => !prev); // Trigger refresh
+      setToast({ title: 'Synced Successfully', message: 'Request has been sent to the server.', type: 'success' });
+  };
+
+  const handleDeleteRequest = async (id: string) => {
+      await deleteFromStore('sales_requests', id);
+      setIsSuccess(prev => !prev); // Trigger refresh
+      setToast({ title: 'Request Deleted', message: 'The local request has been removed.', type: 'info' });
+  };
+
+  const handleEditRequest = (req: any) => {
+      setReqData({
+          firstName: req.firstName, lastName: req.lastName, phone: req.phone, email: req.email, address: req.address,
+          packageId: req.packageId, packageName: req.packageName, packagePrice: req.packagePrice,
+          paymentType: req.paymentType, downPayment: req.downPayment, tenor: req.tenor,
+          idType: req.idType, idNumber: req.idNumber, idImage: req.idImage,
+          guarantorName: req.guarantorName, guarantorPhone: req.guarantorPhone, guarantorRel: req.guarantorRel,
+          deviceSns: req.deviceSns,
+          nokName: req.nokName, nokPhone: req.nokPhone,
+          installFee: req.installFee, accessoriesCost: req.accessoriesCost
+      });
+      setEditingRequestId(req.id);
+      setShowRequestSheet(true);
   };
 
   // --- Calculations ---
@@ -206,8 +257,23 @@ const Sales: React.FC = () => {
   const filteredPackages = useMemo(() => dbPackages.filter(p => p.name.toLowerCase().includes(pkgSearch.toLowerCase())), [dbPackages, pkgSearch]);
   const filteredInventory = useMemo(() => dbInventory.filter(i => i.name.toLowerCase().includes(invSearch.toLowerCase())), [dbInventory, invSearch]);
   const filteredDevices = useMemo(() => dbDevices.filter(d => d.sn.toLowerCase().includes(devSearch.toLowerCase()) || d.model.toLowerCase().includes(devSearch.toLowerCase())), [dbDevices, devSearch]);
+  
+  // Filter for Sales History
   const filteredSales = useMemo(() => dbSales.filter(s => s.customer?.toLowerCase().includes(listSearchQuery.toLowerCase()) || s.product?.toLowerCase().includes(listSearchQuery.toLowerCase()) || s.id.toLowerCase().includes(listSearchQuery.toLowerCase())), [dbSales, listSearchQuery]);
-  const totalPages = Math.ceil(filteredSales.length / ITEMS_PER_PAGE);
+  const salesTotalPages = Math.ceil(filteredSales.length / ITEMS_PER_PAGE);
+  const paginatedSales = filteredSales.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+
+  // Filter for Requests
+  const filteredRequests = useMemo(() => {
+      let filtered = dbSalesRequests;
+      if (requestTab === 'sent') {
+          // Assume synced if status is SYNCED or undefined (legacy)
+          filtered = filtered.filter(r => r.syncStatus === 'SYNCED' || !r.syncStatus);
+      } else {
+          filtered = filtered.filter(r => r.syncStatus === 'PENDING_SYNC');
+      }
+      return filtered.filter(r => (r.firstName + ' ' + r.lastName).toLowerCase().includes(listSearchQuery.toLowerCase()) || r.packageName.toLowerCase().includes(listSearchQuery.toLowerCase()));
+  }, [dbSalesRequests, requestTab, listSearchQuery]);
 
   // --- Wizard Navigation ---
   const handleNext = () => {
@@ -230,6 +296,15 @@ const Sales: React.FC = () => {
 
   return (
     <div className="space-y-6 sm:space-y-8 animate-in slide-in-from-left-4 duration-500 pb-20 lg:pb-0">
+      {toast && (
+        <Toast 
+          title={toast.title} 
+          message={toast.message} 
+          type={toast.type} 
+          onClose={() => setToast(null)} 
+        />
+      )}
+
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">Sales Records</h2>
@@ -278,11 +353,145 @@ const Sales: React.FC = () => {
         </div>
       </div>
 
+      {/* --- Main Content Area: Tabs for History vs Requests --- */}
+      <div className="flex items-center space-x-2 bg-slate-100 dark:bg-slate-900 p-1.5 rounded-2xl w-fit border border-slate-200 dark:border-slate-800">
+         <button onClick={() => { setActiveView('history'); setCurrentPage(1); }} className={`px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeView === 'history' ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>Sales History</button>
+         <button onClick={() => { setActiveView('requests'); setCurrentPage(1); }} className={`px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeView === 'requests' ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}>Request Queue</button>
+      </div>
+
+      <div className="bg-white dark:bg-slate-900 rounded-[2rem] sm:rounded-[3.5rem] shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden">
+        {activeView === 'requests' && (
+            <div className="px-6 sm:px-10 pt-6 sm:pt-8 flex items-center space-x-6 border-b border-slate-100 dark:border-slate-800 pb-0">
+               <button onClick={() => setRequestTab('sent')} className={`pb-4 text-sm font-bold border-b-4 transition-all flex items-center space-x-2 ${requestTab === 'sent' ? 'border-ubuxa-blue text-ubuxa-blue' : 'border-transparent text-slate-400 hover:text-slate-600'}`}>
+                   <Send size={16} />
+                   <span>Sent Requests</span>
+               </button>
+               <button onClick={() => setRequestTab('awaiting')} className={`pb-4 text-sm font-bold border-b-4 transition-all flex items-center space-x-2 ${requestTab === 'awaiting' ? 'border-amber-500 text-amber-500' : 'border-transparent text-slate-400 hover:text-slate-600'}`}>
+                   <CloudOff size={16} />
+                   <span>Awaiting Sync</span>
+                   {dbSalesRequests.filter(r => r.syncStatus === 'PENDING_SYNC').length > 0 && <span className="bg-amber-100 dark:bg-amber-900 text-amber-600 text-[9px] px-1.5 py-0.5 rounded-full ml-1">{dbSalesRequests.filter(r => r.syncStatus === 'PENDING_SYNC').length}</span>}
+               </button>
+            </div>
+        )}
+
+        <div className="p-6 sm:p-10 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center space-x-3">
+             <div className="p-2 sm:p-3 bg-blue-50 dark:bg-blue-900/30 text-ubuxa-blue rounded-lg sm:rounded-xl shrink-0">
+                {activeView === 'history' ? <Archive size={18} /> : <FileText size={18} />}
+             </div>
+             <h3 className="font-bold text-slate-900 dark:text-white text-base sm:text-lg">
+                {activeView === 'history' ? 'Completed Transactions' : requestTab === 'sent' ? 'Sent & In Review' : 'Offline Drafts'}
+             </h3>
+          </div>
+          <div className="relative group w-full sm:max-w-xs">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-ubuxa-blue transition-colors" size={16} />
+            <input 
+              type="text" 
+              value={listSearchQuery}
+              onChange={(e) => { setListSearchQuery(e.target.value); setCurrentPage(1); }}
+              placeholder="Search records..." 
+              className="w-full pl-10 pr-4 py-2 sm:py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[11px] sm:text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-ubuxa-blue transition-all"
+            />
+          </div>
+        </div>
+        
+        {/* Sales History List */}
+        {activeView === 'history' ? (
+          <div className="divide-y divide-slate-100 dark:divide-slate-800">
+            {paginatedSales.map((sale) => (
+              <div key={sale.id} onClick={() => setSelectedSaleDetails(sale)} className="p-5 sm:p-8 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800 transition-all cursor-pointer group active:bg-slate-100 dark:active:bg-slate-800">
+                <div className="flex items-center space-x-4 sm:space-x-8 min-w-0">
+                  <div className={`w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl flex items-center justify-center transition-all shadow-sm shrink-0 ${
+                      sale.status === 'COMPLETED' ? 'bg-blue-50 dark:bg-blue-900/30 text-ubuxa-blue' : 
+                      'bg-slate-100 dark:bg-slate-800 text-slate-400'
+                  }`}>
+                      <ShoppingCart size={20} />
+                  </div>
+                  <div className="min-w-0">
+                    <h4 className="font-bold text-slate-900 dark:text-white text-sm sm:text-lg group-hover:text-ubuxa-blue transition-colors tracking-tight truncate">{sale.customer}</h4>
+                    <p className="text-[9px] sm:text-[10px] text-slate-400 font-black uppercase tracking-widest mt-1 truncate">{sale.product} • <span className="text-slate-500">{sale.id}</span></p>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-3 sm:space-x-8 shrink-0">
+                  <div className="text-right hidden sm:block">
+                    <p className="font-black text-slate-900 dark:text-white text-lg italic tracking-tight">₦{sale.amount.toLocaleString()}</p>
+                    <p className="text-[10px] text-slate-400 font-bold uppercase mt-1">{sale.date}</p>
+                  </div>
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-slate-50 dark:bg-slate-800 rounded-lg sm:rounded-xl flex items-center justify-center text-slate-300 dark:text-slate-600 group-hover:bg-ubuxa-blue group-hover:text-white transition-all"><ChevronRightIcon size={18} /></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          /* Sales Requests List */
+          <div className="divide-y divide-slate-100 dark:divide-slate-800">
+             {filteredRequests.map((req) => (
+                <div key={req.id} className="p-5 sm:p-8 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all group">
+                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                      <div className="flex items-center space-x-4 sm:space-x-6 min-w-0 cursor-pointer" onClick={() => setSelectedSaleDetails({...req, status: 'REQUEST'})}>
+                         <div className={`w-12 h-12 rounded-2xl flex items-center justify-center border shrink-0 ${requestTab === 'sent' ? 'bg-blue-50 border-blue-100 text-blue-500' : 'bg-amber-50 border-amber-100 text-amber-500'}`}>
+                            {requestTab === 'sent' ? <Send size={20} /> : <CloudOff size={20} />}
+                         </div>
+                         <div className="min-w-0">
+                             <div className="flex items-center space-x-2">
+                                <h4 className="font-bold text-slate-900 dark:text-white text-base truncate">{req.firstName} {req.lastName}</h4>
+                                <span className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 bg-slate-100 dark:bg-slate-800 rounded text-slate-500">{req.id}</span>
+                             </div>
+                             <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 truncate">{req.packageName} • ₦{(req.packagePrice + Number(req.installFee) + Number(req.accessoriesCost)).toLocaleString()}</p>
+                             <p className="text-xs text-slate-400 mt-1">Updated: {new Date(req.lastModified || Date.now()).toLocaleDateString()}</p>
+                         </div>
+                      </div>
+                      
+                      <div className="flex items-center space-x-2 sm:ml-auto pl-16 sm:pl-0">
+                         {requestTab === 'awaiting' ? (
+                            <>
+                                <button onClick={() => handleRetrySync(req)} className="p-2.5 bg-ubuxa-gradient text-white rounded-xl shadow-lg shadow-primary/20 hover:scale-105 transition-transform flex items-center space-x-2" title="Retry Sync">
+                                   <RefreshCw size={16} />
+                                   <span className="text-xs font-bold hidden sm:inline">Sync</span>
+                                </button>
+                                <button onClick={() => handleEditRequest(req)} className="p-2.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors" title="Edit">
+                                   <Edit size={16} />
+                                </button>
+                                <button onClick={() => handleDeleteRequest(req.id)} className="p-2.5 bg-red-50 dark:bg-red-900/20 text-red-500 rounded-xl hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors" title="Delete">
+                                   <Trash2 size={16} />
+                                </button>
+                            </>
+                         ) : (
+                            <div className="px-4 py-2 bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 rounded-xl text-xs font-bold flex items-center space-x-2">
+                               <CheckCircle2 size={14} />
+                               <span>Sent to HQ</span>
+                            </div>
+                         )}
+                      </div>
+                   </div>
+                </div>
+             ))}
+             {filteredRequests.length === 0 && (
+                 <div className="p-12 text-center text-slate-400 flex flex-col items-center">
+                     <FileText size={40} className="mb-4 opacity-20" />
+                     <p className="font-medium">No requests found in this queue.</p>
+                 </div>
+             )}
+          </div>
+        )}
+
+        {/* Pagination (Only for Sales History) */}
+        {activeView === 'history' && salesTotalPages > 1 && (
+          <div className="px-6 py-4 sm:px-10 sm:py-6 bg-slate-50 dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+            <span className="text-[9px] sm:text-[11px] font-black text-slate-400 uppercase tracking-widest">Page {currentPage} of {salesTotalPages}</span>
+            <div className="flex space-x-2">
+              <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="w-10 h-10 sm:w-12 sm:h-12 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl sm:rounded-2xl flex items-center justify-center text-slate-400 disabled:opacity-30 hover:border-ubuxa-blue active:scale-90 transition-all shadow-sm"><ChevronLeftIcon size={18} /></button>
+              <button onClick={() => setCurrentPage(p => Math.min(salesTotalPages, p + 1))} disabled={currentPage === salesTotalPages} className="w-10 h-10 sm:w-12 sm:h-12 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl sm:rounded-2xl flex items-center justify-center text-slate-400 disabled:opacity-30 hover:border-ubuxa-blue active:scale-90 transition-all shadow-sm"><ChevronRightIcon size={18} /></button>
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* --- Sales Request Bottom Sheet (Multi-Step) --- */}
       <BottomSheetModal
         isOpen={showRequestSheet}
         onClose={resetRequestFlow}
-        title="Create Sales Request"
+        title={editingRequestId ? "Edit Request" : "Create Sales Request"}
       >
         <div className="space-y-6 pb-20">
             {/* Progress Bar */}
@@ -439,7 +648,7 @@ const Sales: React.FC = () => {
                     }} 
                     className="flex-1"
                 >
-                    {requestStep === 9 ? 'Submit Request' : 'Next'}
+                    {requestStep === 9 ? (editingRequestId ? 'Save Changes' : 'Submit Request') : 'Next'}
                 </PrimaryButton>
             </div>
         </div>
@@ -749,61 +958,6 @@ const Sales: React.FC = () => {
         </div>
       </div>
 
-      {/* Sales Logs */}
-      <div className="bg-white dark:bg-slate-900 rounded-[2rem] sm:rounded-[3.5rem] shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden">
-        <div className="p-6 sm:p-10 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center space-x-3">
-             <div className="p-2 sm:p-3 bg-blue-50 dark:bg-blue-900/30 text-ubuxa-blue rounded-lg sm:rounded-xl shrink-0"><Hash size={18} /></div>
-             <h3 className="font-bold text-slate-900 dark:text-white text-base sm:text-lg">Recent Archive</h3>
-          </div>
-          <div className="relative group w-full sm:max-w-xs">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-ubuxa-blue transition-colors" size={16} />
-            <input 
-              type="text" 
-              value={listSearchQuery}
-              onChange={(e) => { setListSearchQuery(e.target.value); setCurrentPage(1); }}
-              placeholder="Search..." 
-              className="w-full pl-10 pr-4 py-2 sm:py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-[11px] sm:text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-ubuxa-blue transition-all"
-            />
-          </div>
-        </div>
-        <div className="divide-y divide-slate-100 dark:divide-slate-800">
-          {filteredSales.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE).map((sale) => (
-            <div key={sale.id} onClick={() => setSelectedSaleDetails(sale)} className="p-5 sm:p-8 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800 transition-all cursor-pointer group active:bg-slate-100 dark:active:bg-slate-800">
-              <div className="flex items-center space-x-4 sm:space-x-8 min-w-0">
-                <div className={`w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl flex items-center justify-center transition-all shadow-sm shrink-0 ${
-                    sale.status === 'COMPLETED' ? 'bg-blue-50 dark:bg-blue-900/30 text-ubuxa-blue' : 
-                    sale.status === 'REQUEST' ? 'bg-purple-50 dark:bg-purple-900/30 text-purple-600' :
-                    'bg-slate-100 dark:bg-slate-800 text-slate-400'
-                }`}>
-                    {sale.status === 'REQUEST' ? <FileText size={20} /> : <ShoppingCart size={20} />}
-                </div>
-                <div className="min-w-0">
-                   <h4 className="font-bold text-slate-900 dark:text-white text-sm sm:text-lg group-hover:text-ubuxa-blue transition-colors tracking-tight truncate">{sale.customer}</h4>
-                   <p className="text-[9px] sm:text-[10px] text-slate-400 font-black uppercase tracking-widest mt-1 truncate">{sale.product} • <span className="text-slate-500">{sale.id}</span></p>
-                </div>
-              </div>
-              <div className="flex items-center space-x-3 sm:space-x-8 shrink-0">
-                <div className="text-right hidden sm:block">
-                   <p className="font-black text-slate-900 dark:text-white text-lg italic tracking-tight">₦{sale.amount.toLocaleString()}</p>
-                   <p className="text-[10px] text-slate-400 font-bold uppercase mt-1">{sale.date}</p>
-                </div>
-                <div className="w-8 h-8 sm:w-10 sm:h-10 bg-slate-50 dark:bg-slate-800 rounded-lg sm:rounded-xl flex items-center justify-center text-slate-300 dark:text-slate-600 group-hover:bg-ubuxa-blue group-hover:text-white transition-all"><ChevronRightIcon size={18} /></div>
-              </div>
-            </div>
-          ))}
-        </div>
-        {totalPages > 1 && (
-          <div className="px-6 py-4 sm:px-10 sm:py-6 bg-slate-50 dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
-            <span className="text-[9px] sm:text-[11px] font-black text-slate-400 uppercase tracking-widest">Page {currentPage} of {totalPages}</span>
-            <div className="flex space-x-2">
-              <button onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1} className="w-10 h-10 sm:w-12 sm:h-12 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl sm:rounded-2xl flex items-center justify-center text-slate-400 disabled:opacity-30 hover:border-ubuxa-blue active:scale-90 transition-all shadow-sm"><ChevronLeftIcon size={18} /></button>
-              <button onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className="w-10 h-10 sm:w-12 sm:h-12 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl sm:rounded-2xl flex items-center justify-center text-slate-400 disabled:opacity-30 hover:border-ubuxa-blue active:scale-90 transition-all shadow-sm"><ChevronRightIcon size={18} /></button>
-            </div>
-          </div>
-        )}
-      </div>
-
       <BottomSheetModal
         isOpen={!!selectedSaleDetails}
         onClose={() => setSelectedSaleDetails(null)}
@@ -832,7 +986,7 @@ const Sales: React.FC = () => {
                 </div>
                 <div className="text-right">
                    <p className="text-sm font-medium opacity-80">Total Amount</p>
-                   <p className="text-2xl font-bold tracking-tight">₦{selectedSaleDetails.amount.toLocaleString()}</p>
+                   <p className="text-2xl font-bold tracking-tight">₦{(selectedSaleDetails.amount || selectedSaleDetails.packagePrice).toLocaleString()}</p>
                 </div>
              </div>
 
@@ -844,7 +998,7 @@ const Sales: React.FC = () => {
                    </div>
                    <div>
                       <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Customer</p>
-                      <p className="font-bold text-slate-900 dark:text-white">{selectedSaleDetails.customer}</p>
+                      <p className="font-bold text-slate-900 dark:text-white">{selectedSaleDetails.customer || (selectedSaleDetails.firstName + ' ' + selectedSaleDetails.lastName)}</p>
                    </div>
                 </div>
                 <button className="text-xs font-bold text-ubuxa-blue">View Profile</button>
@@ -856,7 +1010,7 @@ const Sales: React.FC = () => {
                 <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl space-y-3">
                    <div className="flex justify-between">
                       <span className="text-sm text-slate-600 dark:text-slate-400">Product</span>
-                      <span className="text-sm font-bold text-slate-900 dark:text-white">{selectedSaleDetails.product}</span>
+                      <span className="text-sm font-bold text-slate-900 dark:text-white">{selectedSaleDetails.product || selectedSaleDetails.packageName}</span>
                    </div>
                    <div className="flex justify-between">
                       <span className="text-sm text-slate-600 dark:text-slate-400">Date</span>
