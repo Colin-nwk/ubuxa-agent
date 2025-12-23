@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, AreaChart, Area } from 'recharts';
 import { 
   Download, 
@@ -10,8 +10,14 @@ import {
   Target,
   Users,
   Box,
-  ArrowUpRight
+  ArrowUpRight,
+  FileText,
+  Share2,
+  Printer,
+  FileType,
+  CheckCircle2
 } from 'lucide-react';
+import { BottomSheetModal, PrimaryButton, SecondaryButton, Input, Select, Toast } from './Shared';
 
 const barData = [
   { name: 'Jan', value: 45 },
@@ -31,23 +37,54 @@ const trendData = [
   { name: 'Week 6', revenue: 3200000 },
 ];
 
+const MOCK_RECENT_REPORTS = [
+    { id: 'RPT-2024-001', title: 'Q1 Sales Performance', type: 'Sales', date: 'Mar 31, 2024', size: '2.4 MB' },
+    { id: 'RPT-2024-002', title: 'Inventory Audit Log', type: 'Inventory', date: 'Mar 28, 2024', size: '1.1 MB' },
+    { id: 'RPT-2024-003', title: 'Agent Commission Slip', type: 'Financial', date: 'Mar 15, 2024', size: '0.8 MB' },
+];
+
 // Updated Colors: Primary (Teal), Secondary (Teal Light), Accent (Amber)
 const COLORS = ['#0F766E', '#14B8A6', '#F59E0B', '#0F766E', '#14B8A6', '#F59E0B'];
 
 const Reports: React.FC = () => {
+  const [showDateFilter, setShowDateFilter] = useState(false);
+  const [showExport, setShowExport] = useState(false);
+  const [selectedReport, setSelectedReport] = useState<any>(null);
+  const [toast, setToast] = useState<{ title: string; message: string; type: any } | null>(null);
+  const [dateRange, setDateRange] = useState({ start: '', end: '', period: 'Last 30 Days' });
+
+  const handleApplyFilter = () => {
+    setShowDateFilter(false);
+    setToast({ title: 'Filter Applied', message: `Showing data for ${dateRange.period}`, type: 'success' });
+  };
+
+  const handleExport = () => {
+    setShowExport(false);
+    setToast({ title: 'Export Started', message: 'Your report is being generated.', type: 'info' });
+  };
+
   return (
-    <div className="space-y-10 animate-in slide-in-from-top-4 duration-500">
+    <div className="space-y-10 animate-in slide-in-from-top-4 duration-500 pb-20 lg:pb-0">
+      {toast && (
+        <Toast 
+          title={toast.title} 
+          message={toast.message} 
+          type={toast.type} 
+          onClose={() => setToast(null)} 
+        />
+      )}
+
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
           <h2 className="text-3xl font-bold text-slate-900 dark:text-white tracking-tight">System Intelligence</h2>
           <p className="text-slate-500 dark:text-slate-400 font-medium text-sm mt-1">Audit sales performance and hub efficiency trends</p>
         </div>
         <div className="flex items-center space-x-4">
-          <button className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-6 py-4 rounded-2xl font-bold flex items-center space-x-3 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all shadow-sm">
+          <button onClick={() => setShowDateFilter(true)} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-6 py-4 rounded-2xl font-bold flex items-center space-x-3 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all shadow-sm">
             <Calendar size={20} />
-            <span>Select Period</span>
+            <span>{dateRange.period || 'Select Period'}</span>
           </button>
-          <button className="bg-slate-900 dark:bg-slate-800 text-white px-8 py-4 rounded-2xl font-bold flex items-center space-x-3 shadow-xl shadow-slate-200 dark:shadow-slate-900 hover:bg-slate-800 dark:hover:bg-slate-700 transition-all active:scale-95">
+          <button onClick={() => setShowExport(true)} className="bg-slate-900 dark:bg-slate-800 text-white px-8 py-4 rounded-2xl font-bold flex items-center space-x-3 shadow-xl shadow-slate-200 dark:shadow-slate-900 hover:bg-slate-800 dark:hover:bg-slate-700 transition-all active:scale-95">
             <Download size={20} />
             <span>Export Audit</span>
           </button>
@@ -138,6 +175,120 @@ const Reports: React.FC = () => {
           color="bg-ubuxa-blue" 
          />
       </div>
+
+      {/* Recent Reports List */}
+      <div className="space-y-6">
+        <h3 className="text-xl font-bold text-slate-900 dark:text-white">Generated Reports</h3>
+        <div className="bg-white dark:bg-slate-900 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 overflow-hidden">
+            {MOCK_RECENT_REPORTS.map((report, i) => (
+                <div key={report.id} onClick={() => setSelectedReport(report)} className={`p-6 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer ${i !== MOCK_RECENT_REPORTS.length - 1 ? 'border-b border-slate-100 dark:border-slate-800' : ''}`}>
+                    <div className="flex items-center space-x-4">
+                        <div className="w-12 h-12 bg-blue-50 dark:bg-blue-900/20 text-ubuxa-blue rounded-2xl flex items-center justify-center">
+                            <FileText size={24} />
+                        </div>
+                        <div>
+                            <h4 className="font-bold text-slate-900 dark:text-white text-base">{report.title}</h4>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{report.date} • {report.size}</p>
+                        </div>
+                    </div>
+                    <div className="flex items-center space-x-4">
+                        <span className="text-[10px] font-black uppercase tracking-widest bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-lg text-slate-500 dark:text-slate-400">{report.type}</span>
+                        <ChevronRight size={20} className="text-slate-300" />
+                    </div>
+                </div>
+            ))}
+        </div>
+      </div>
+
+      {/* --- Bottom Sheets --- */}
+      
+      {/* Date Filter Sheet */}
+      <BottomSheetModal isOpen={showDateFilter} onClose={() => setShowDateFilter(false)} title="Filter Period">
+         <div className="space-y-6">
+            <div className="grid grid-cols-2 gap-3">
+                {['Today', 'Yesterday', 'Last 7 Days', 'Last 30 Days', 'This Month', 'Last Month'].map(p => (
+                    <button 
+                        key={p} 
+                        onClick={() => setDateRange({...dateRange, period: p})}
+                        className={`py-3 rounded-xl text-xs font-bold transition-all ${dateRange.period === p ? 'bg-ubuxa-blue text-white shadow-lg' : 'bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700'}`}
+                    >
+                        {p}
+                    </button>
+                ))}
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+                <Input label="Start Date" type="date" value={dateRange.start} onChange={e => setDateRange({...dateRange, start: e.target.value})} />
+                <Input label="End Date" type="date" value={dateRange.end} onChange={e => setDateRange({...dateRange, end: e.target.value})} />
+            </div>
+            <PrimaryButton className="w-full" onClick={handleApplyFilter}>Apply Filters</PrimaryButton>
+         </div>
+      </BottomSheetModal>
+
+      {/* Export Sheet */}
+      <BottomSheetModal isOpen={showExport} onClose={() => setShowExport(false)} title="Export Data">
+         <div className="space-y-6">
+            <div className="space-y-4">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">File Format</label>
+                <div className="grid grid-cols-3 gap-4">
+                    <button className="p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border-2 border-transparent hover:border-ubuxa-blue flex flex-col items-center justify-center space-y-2 transition-all group">
+                        <FileText size={24} className="text-slate-400 group-hover:text-ubuxa-blue" />
+                        <span className="text-xs font-bold text-slate-700 dark:text-slate-300">PDF</span>
+                    </button>
+                    <button className="p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border-2 border-transparent hover:border-ubuxa-blue flex flex-col items-center justify-center space-y-2 transition-all group">
+                        <FileType size={24} className="text-slate-400 group-hover:text-green-500" />
+                        <span className="text-xs font-bold text-slate-700 dark:text-slate-300">Excel</span>
+                    </button>
+                    <button className="p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border-2 border-transparent hover:border-ubuxa-blue flex flex-col items-center justify-center space-y-2 transition-all group">
+                        <FileType size={24} className="text-slate-400 group-hover:text-orange-500" />
+                        <span className="text-xs font-bold text-slate-700 dark:text-slate-300">CSV</span>
+                    </button>
+                </div>
+            </div>
+            <Select label="Data Scope">
+                <option>Executive Summary</option>
+                <option>Detailed Transaction Log</option>
+                <option>Inventory Movement</option>
+                <option>Customer Acquisition</option>
+            </Select>
+            <div className="pt-2">
+                <PrimaryButton className="w-full" icon={<Download size={20} />} onClick={handleExport}>Download Report</PrimaryButton>
+            </div>
+         </div>
+      </BottomSheetModal>
+
+      {/* Report Details Sheet */}
+      <BottomSheetModal isOpen={!!selectedReport} onClose={() => setSelectedReport(null)} title="Report Details">
+         {selectedReport && (
+             <div className="space-y-8">
+                <div className="bg-slate-50 dark:bg-slate-800 p-6 rounded-3xl flex items-start space-x-4">
+                    <div className="w-16 h-16 bg-white dark:bg-slate-900 rounded-2xl flex items-center justify-center text-ubuxa-blue shadow-sm shrink-0">
+                        <FileText size={32} />
+                    </div>
+                    <div>
+                        <h3 className="text-xl font-bold text-slate-900 dark:text-white">{selectedReport.title}</h3>
+                        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Generated on {selectedReport.date}</p>
+                        <div className="flex items-center space-x-2 mt-3">
+                            <span className="text-[10px] font-black uppercase bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-2 py-1 rounded-md">{selectedReport.type}</span>
+                            <span className="text-[10px] font-black uppercase bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-2 py-1 rounded-md">{selectedReport.size}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                    <button className="p-4 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl flex flex-col items-center justify-center space-y-2 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                        <Share2 size={20} className="text-slate-900 dark:text-white" />
+                        <span className="text-xs font-bold text-slate-500 dark:text-slate-400">Share</span>
+                    </button>
+                    <button className="p-4 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-2xl flex flex-col items-center justify-center space-y-2 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
+                        <Printer size={20} className="text-slate-900 dark:text-white" />
+                        <span className="text-xs font-bold text-slate-500 dark:text-slate-400">Print</span>
+                    </button>
+                </div>
+
+                <PrimaryButton className="w-full" icon={<Download size={20} />}>Download File</PrimaryButton>
+             </div>
+         )}
+      </BottomSheetModal>
     </div>
   );
 };
